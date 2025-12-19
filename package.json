@@ -1,0 +1,36 @@
+{
+  "name": "locabriques-mcp",
+  "version": "1.0.0",
+  "description": "MCP Server for LocaBriques API",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "locabriques-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "test": "vitest run"
+  },
+  "keywords": [
+    "mcp",
+    "locabriques"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.1",
+    "axios": "^1.13.2",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "openapi-typescript": "^7.10.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
+  }
+}
