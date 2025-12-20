@@ -121,4 +121,40 @@ export function registerLegosetsTools(server: McpServer) {
             }
         }
     );
+
+    // Tool: legoset_search_brickset
+    server.tool(
+        'legoset_search_brickset',
+        'Search the external Brickset API to find LEGO set IDs for registration.',
+        {
+            search: z.string().optional().describe('Query string to apply. If not set, we will ask Brickset for most recent sets'),
+            page: z.number().int().optional().describe('A page number within the paginated result set.'),
+        },
+        async ({ search, page }) => {
+            try {
+                const response = await apiClient.get('/api/brickset/search/', {
+                    params: { search, page },
+                });
+
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(response.data, null, 2),
+                        },
+                    ],
+                };
+            } catch (error: any) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: `Could not search Brickset API: ${error.message}`,
+                        },
+                    ],
+                    isError: true,
+                };
+            }
+        }
+    );
 }

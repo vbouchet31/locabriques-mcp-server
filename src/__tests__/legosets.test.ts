@@ -35,6 +35,7 @@ describe('Legosets Module', () => {
         expect(tools).toHaveProperty('legoset_search');
         expect(tools).toHaveProperty('legoset_retrieve');
         expect(tools).toHaveProperty('legoset_register');
+        expect(tools).toHaveProperty('legoset_search_brickset');
     });
 
     describe('legoset_search', () => {
@@ -156,6 +157,44 @@ describe('Legosets Module', () => {
 
             expect(result.isError).toBe(true);
             expect(result.content[0].text).toContain('Could not register LEGO set from brickset: Network Error');
+        });
+    });
+
+    describe('legoset_search_brickset', () => {
+        it('should call API with search query parameter', async () => {
+            const handler = tools['legoset_search_brickset'].handler;
+            const mockData = { results: [{ setID: 12345, name: 'Millennium Falcon' }] };
+            (apiClient.get as any).mockResolvedValue({ data: mockData });
+
+            const result = await handler({ search: 'millennium falcon', page: 1 });
+
+            expect(apiClient.get).toHaveBeenCalledWith('/api/brickset/search/', {
+                params: { search: 'millennium falcon', page: 1 },
+            });
+            expect(JSON.parse(result.content[0].text)).toEqual(mockData);
+        });
+
+        it('should call API without search for recent sets', async () => {
+            const handler = tools['legoset_search_brickset'].handler;
+            const mockData = { results: [{ setID: 99999, name: 'Recent Set' }] };
+            (apiClient.get as any).mockResolvedValue({ data: mockData });
+
+            const result = await handler({});
+
+            expect(apiClient.get).toHaveBeenCalledWith('/api/brickset/search/', {
+                params: { search: undefined, page: undefined },
+            });
+            expect(JSON.parse(result.content[0].text)).toEqual(mockData);
+        });
+
+        it('should handle API errors gracefully', async () => {
+            const handler = tools['legoset_search_brickset'].handler;
+            (apiClient.get as any).mockRejectedValue(new Error('Brickset API unavailable'));
+
+            const result = await handler({ search: 'test' });
+
+            expect(result.isError).toBe(true);
+            expect(result.content[0].text).toContain('Could not search Brickset API: Brickset API unavailable');
         });
     });
 });
