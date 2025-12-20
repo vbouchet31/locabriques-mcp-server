@@ -3,9 +3,9 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { apiClient } from '../lib/api-client.js';
 
 export function registerShopsTools(server: McpServer) {
-    // Tool: shops_list
+    // Tool: shop_list
     server.tool(
-        'shops_list',
+        'shop_list',
         'List all shops registered on LocaBriques. Allows filtering by open status and pagination.',
         {
             page: z.number().optional().describe('A page number within the paginated result set.'),

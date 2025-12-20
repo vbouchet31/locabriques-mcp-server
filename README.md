@@ -17,7 +17,7 @@ A Model Context Protocol (MCP) server implementation for Locabriques, enabling A
 
 | Tool Name | Description |
 | :--- | :--- |
-| `shops_list` | List all shops registered on LocaBriques |
+| `shop_list` | List all shops registered on LocaBriques |
 | `shop_retrieve` | Retrieve a specific shop by its slug |
 | `shop_list_sets` | List all sets rented in a specific shop |
 | `shop_retrieve_set` | Retrieve a specific set rented in a shop |

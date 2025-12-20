@@ -30,14 +30,14 @@ describe('Shops Module', () => {
         registerShopsTools(server);
     });
 
-    it('should register shops_list and shop_retrieve tools', () => {
-        expect(tools).toHaveProperty('shops_list');
+    it('should register shop_list and shop_retrieve tools', () => {
+        expect(tools).toHaveProperty('shop_list');
         expect(tools).toHaveProperty('shop_retrieve');
     });
 
-    describe('shops_list', () => {
+    describe('shop_list', () => {
         it('should call API with correct parameters', async () => {
-            const handler = tools['shops_list'].handler;
+            const handler = tools['shop_list'].handler;
             const mockData = { results: [] };
             (apiClient.get as any).mockResolvedValue({ data: mockData });
 
@@ -50,7 +50,7 @@ describe('Shops Module', () => {
         });
 
         it('should handle API errors gracefully', async () => {
-            const handler = tools['shops_list'].handler;
+            const handler = tools['shop_list'].handler;
             (apiClient.get as any).mockRejectedValue(new Error('API Failure'));
 
             const result = await handler({});
