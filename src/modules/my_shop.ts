@@ -72,7 +72,7 @@ export function registerMyShopTools(server: McpServer) {
         'myshop_update',
         "Update your shop info",
         {
-            MyShopUpdateSchema,
+            ...MyShopUpdateSchema,
         },
         async (params) => {
             try {
@@ -125,7 +125,7 @@ export function registerMyShopTools(server: McpServer) {
         'myshop_partial_update',
         "Partially update your shop information",
         {
-            MyShopPartialUpdateSchema,
+            ...MyShopPartialUpdateSchema,
         },
         async (params) => {
             try {
@@ -382,6 +382,251 @@ export function registerMyShopTools(server: McpServer) {
                         {
                             type: 'text',
                             text: `Coupon ${id} deleted successfully.`,
+                        },
+                    ],
+                };
+            } catch (error: any) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: `Error: ${error.message}`,
+                        },
+                    ],
+                    isError: true,
+                };
+            }
+        }
+    );
+
+    // --- SETS ---
+
+    const SortingTypeEnum = z.enum(['COLOR', 'BAG_NUMBER', 'OTHER']).describe(`Sorting type
+* \`COLOR\` - Color
+* \`BAG_NUMBER\` - Numbered bags
+* \`OTHER\` - Other`);
+
+    const RentableSetBaseSchema = z.object({
+        rental_price: z.number().int().min(0).optional().describe('Price / 1 month (€)'),
+        rental_price_without_delivery: z.number().int().min(0).optional().describe('Price / 1 month (€) if hand delivered'),
+        deposit: z.number().int().min(0).optional().describe('Deposit amount (€)'),
+        auto_update_deposit: z.boolean().optional().describe('Automatic deposit update'),
+        is_available: z.boolean().optional().describe('Set available for rental?'),
+        sorting_type: SortingTypeEnum.optional(),
+        comment: z.string().optional().describe('Comment on product condition'),
+        private_comment: z.string().optional().describe('Private comment about product (visible only to product owner)'),
+        product_weight: z.number().int().min(0).optional().describe('Weight (grams)'),
+        bulk_return_fee: z.number().min(0).optional().describe('Bulk return fees (€)'),
+    });
+
+    // CreateRentableSet in openapi adds legoset_lego_id and requires some fields?
+    // Checking openapi again... logic from implementation plan says:
+    // "auto_update_deposit (required)" well, let's verify if I should make it required or optional consistent with others.
+    // openapi says: required: - auto_update_deposit.
+    // So in BaseSchema for Update it might be optional if using partial?
+    // Actually, UpdateRentableSet properties are all optional in openapi definition except potentially what's in required list?
+    // Checking openapi update definition: "required: - auto_update_deposit" is usually for Create.
+    // Let's re-read openapi snippet for UpdateRentableSet (line 5629): required: - auto_update_deposit.
+    // So auto_update_deposit is required in Update as well.
+
+    // Correction:
+    const RentableSetBaseStrictSchema = z.object({
+        rental_price: z.number().int().min(0).optional().describe('Price / 1 month (€)'),
+        rental_price_without_delivery: z.number().int().min(0).optional().describe('Price / 1 month (€) if hand delivered'),
+        deposit: z.number().int().min(0).optional().describe('Deposit amount (€)'),
+        auto_update_deposit: z.boolean().describe('Automatic deposit update'), // Required
+        is_available: z.boolean().optional().describe('Set available for rental?'),
+        sorting_type: SortingTypeEnum.optional(),
+        comment: z.string().optional().describe('Comment on product condition'),
+        private_comment: z.string().optional().describe('Private comment about product (visible only to product owner)'),
+        product_weight: z.number().int().min(0).optional().describe('Weight (grams)'),
+        bulk_return_fee: z.number().min(0).optional().describe('Bulk return fees (€)'),
+    });
+
+    const CreateRentableSetSchema = RentableSetBaseStrictSchema.extend({
+        legoset_lego_id: z.string().regex(/^[0-9]{3,}-[0-9]$/).describe('LEGO® identifier of the set to add'),
+    });
+
+    const UpdateRentableSetSchema = RentableSetBaseStrictSchema;
+    const PartialUpdateRentableSetSchema = RentableSetBaseStrictSchema.partial();
+
+    // GET /api/my_shop/sets/
+    server.tool(
+        'myshop_list_sets',
+        "List all sets in your inventory",
+        {
+            // No params documented in requirement, assuming empty for list all
+        },
+        async () => {
+            try {
+                const response = await apiClient.get('/api/my_shop/sets/');
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(response.data, null, 2),
+                        },
+                    ],
+                };
+            } catch (error: any) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: `Error: ${error.message}`,
+                        },
+                    ],
+                    isError: true,
+                };
+            }
+        }
+    );
+
+    // POST /api/my_shop/sets/
+    server.tool(
+        'myshop_create_set',
+        "Register a new set in your inventory",
+        CreateRentableSetSchema.shape,
+        async (params) => {
+            try {
+                const response = await apiClient.post('/api/my_shop/sets/', params);
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(response.data, null, 2),
+                        },
+                    ],
+                };
+            } catch (error: any) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: `Error: ${error.message}`,
+                        },
+                    ],
+                    isError: true,
+                };
+            }
+        }
+    );
+
+    // GET /api/my_shop/sets/{id}/
+    server.tool(
+        'myshop_retrieve_set',
+        "Retrieve a set from your inventory",
+        {
+            id: z.number().describe('A unique integer value identifying this rentable set.')
+        },
+        async ({ id }) => {
+            try {
+                const response = await apiClient.get(`/api/my_shop/sets/${id}/`);
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(response.data, null, 2),
+                        },
+                    ],
+                };
+            } catch (error: any) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: `Error: ${error.message}`,
+                        },
+                    ],
+                    isError: true,
+                };
+            }
+        }
+    );
+
+    // PUT /api/my_shop/sets/{id}/
+    server.tool(
+        'myshop_update_set',
+        "Update a set in your inventory",
+        {
+            id: z.number().describe('A unique integer value identifying this rentable set.'),
+            ...UpdateRentableSetSchema.shape
+        },
+        async (params) => {
+            const { id, ...body } = params;
+            try {
+                const response = await apiClient.put(`/api/my_shop/sets/${id}/`, body);
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(response.data, null, 2),
+                        },
+                    ],
+                };
+            } catch (error: any) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: `Error: ${error.message}`,
+                        },
+                    ],
+                    isError: true,
+                };
+            }
+        }
+    );
+
+    // PATCH /api/my_shop/sets/{id}/
+    server.tool(
+        'myshop_partial_update_set',
+        "Partially update a set in your inventory",
+        {
+            id: z.number().describe('A unique integer value identifying this rentable set.'),
+            ...PartialUpdateRentableSetSchema.shape
+        },
+        async (params) => {
+            const { id, ...body } = params;
+            try {
+                const response = await apiClient.patch(`/api/my_shop/sets/${id}/`, body);
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(response.data, null, 2),
+                        },
+                    ],
+                };
+            } catch (error: any) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: `Error: ${error.message}`,
+                        },
+                    ],
+                    isError: true,
+                };
+            }
+        }
+    );
+
+    // DELETE /api/my_shop/sets/{id}/
+    server.tool(
+        'myshop_delete_set',
+        "Remove a set from your inventory",
+        {
+            id: z.number().describe('A unique integer value identifying this rentable set.')
+        },
+        async ({ id }) => {
+            try {
+                await apiClient.delete(`/api/my_shop/sets/${id}/`);
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: `Set ${id} deleted successfully.`,
                         },
                     ],
                 };

@@ -43,6 +43,12 @@ A Model Context Protocol (MCP) server implementation for Locabriques, enabling A
 | `myshop_update_coupon` | Update a coupon in your shop |
 | `myshop_partial_update_coupon` | Partially update a coupon in your shop |
 | `myshop_delete_coupon` | Remove a coupon from your shop |
+| `myshop_list_sets` | List all sets in your inventory |
+| `myshop_create_set` | Register a new set in your inventory |
+| `myshop_retrieve_set` | Retrieve a set from your inventory |
+| `myshop_update_set` | Update a set in your inventory |
+| `myshop_partial_update_set` | Partially update a set in your inventory |
+| `myshop_delete_set` | Remove a set from your inventory |
 
 ### 🎨 Themes
 

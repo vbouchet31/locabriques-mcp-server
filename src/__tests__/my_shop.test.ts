@@ -267,5 +267,90 @@ describe('Private My Shop Tools', () => {
         });
     });
 
+    // --- SETS TESTS ---
+
+    describe('myshop_list_sets', () => {
+        it('should list sets successfully', async () => {
+            const mockData = [{ id: 101, legoset_lego_id: '1234-1' }];
+            vi.mocked(apiClient.get).mockResolvedValue({ data: mockData });
+
+            const result = await tools.myshop_list_sets({});
+            expect(apiClient.get).toHaveBeenCalledWith('/api/my_shop/sets/');
+            expect(JSON.parse(result.content[0].text)).toEqual(mockData);
+        });
+    });
+
+    describe('myshop_create_set', () => {
+        it('should create a set with correct payload', async () => {
+            const mockData = { id: 102, legoset_lego_id: '42115-1' };
+            const params = {
+                legoset_lego_id: '42115-1',
+                auto_update_deposit: true,
+                rental_price: 20,
+                sorting_type: 'BAG_NUMBER'
+            };
+            vi.mocked(apiClient.post).mockResolvedValue({ data: mockData });
+
+            const result = await tools.myshop_create_set(params);
+            expect(apiClient.post).toHaveBeenCalledWith('/api/my_shop/sets/', params);
+            expect(JSON.parse(result.content[0].text)).toEqual(mockData);
+        });
+    });
+
+    describe('myshop_retrieve_set', () => {
+        it('should retrieve a set by ID', async () => {
+            const mockData = { id: 103, legoset_lego_id: '1234-1' };
+            vi.mocked(apiClient.get).mockResolvedValue({ data: mockData });
+
+            const result = await tools.myshop_retrieve_set({ id: 103 });
+            expect(apiClient.get).toHaveBeenCalledWith('/api/my_shop/sets/103/');
+            expect(JSON.parse(result.content[0].text)).toEqual(mockData);
+        });
+    });
+
+    describe('myshop_update_set', () => {
+        it('should update a set (PUT)', async () => {
+            const mockData = { id: 104, rental_price: 25 };
+            const params = {
+                id: 104,
+                auto_update_deposit: false, // Required in strict schema
+                rental_price: 25,
+                comment: 'Updated comment'
+            };
+            const { id, ...expectedBody } = params;
+            vi.mocked(apiClient.put).mockResolvedValue({ data: mockData });
+
+            const result = await tools.myshop_update_set(params);
+            expect(apiClient.put).toHaveBeenCalledWith('/api/my_shop/sets/104/', expectedBody);
+            expect(JSON.parse(result.content[0].text)).toEqual(mockData);
+        });
+    });
+
+    describe('myshop_partial_update_set', () => {
+        it('should partially update a set (PATCH)', async () => {
+            const mockData = { id: 105, is_available: false };
+            const params = {
+                id: 105,
+                is_available: false
+            };
+            const { id, ...expectedBody } = params;
+            vi.mocked(apiClient.patch).mockResolvedValue({ data: mockData });
+
+            const result = await tools.myshop_partial_update_set(params);
+            expect(apiClient.patch).toHaveBeenCalledWith('/api/my_shop/sets/105/', expectedBody);
+            expect(JSON.parse(result.content[0].text)).toEqual(mockData);
+        });
+    });
+
+    describe('myshop_delete_set', () => {
+        it('should delete a set', async () => {
+            vi.mocked(apiClient.delete).mockResolvedValue({ data: {} });
+
+            const result = await tools.myshop_delete_set({ id: 106 });
+            expect(apiClient.delete).toHaveBeenCalledWith('/api/my_shop/sets/106/');
+            expect(result.content[0].text).toContain('deleted successfully');
+        });
+    });
+
 });
 
