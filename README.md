@@ -57,6 +57,12 @@ A Model Context Protocol (MCP) server implementation for Locabriques, enabling A
 | `theme_search` | Search themes in our LEGO® sets database |
 | `theme_retrieve` | Retrieve a LEGO® theme from our database |
 
+### 👤 Users
+
+| Tool Name | Description | Endpoint |
+| :--- | :--- | :--- |
+| `user_list` | List all users registered on LocaBriques whose username matches 'searched_string' | GET /api/users/ |
+
 ## Installation
 
 ### Quick Setup for Claude Desktop

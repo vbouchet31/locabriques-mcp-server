@@ -4,6 +4,7 @@ import { registerLegosetsTools } from './legosets.js';
 import { registerCatalogsTools } from './catalogs.js';
 import { registerThemesTools } from './themes.js';
 import { registerMyShopTools } from './my_shop.js';
+import { registerUserTools } from './users.js';
 
 export function registerAllModules(server: McpServer) {
     registerShopsTools(server);
@@ -11,4 +12,5 @@ export function registerAllModules(server: McpServer) {
     registerCatalogsTools(server);
     registerThemesTools(server);
     registerMyShopTools(server);
+    registerUserTools(server);
 }
