@@ -3,9 +3,9 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { apiClient } from '../lib/api-client.js';
 
 export function registerShopsTools(server: McpServer) {
-    // Tool: list_shops
+    // Tool: shops_list
     server.tool(
-        'list_shops',
+        'shops_list',
         'List all shops registered on LocaBriques. Allows filtering by open status and pagination.',
         {
             page: z.number().optional().describe('A page number within the paginated result set.'),
@@ -42,9 +42,9 @@ export function registerShopsTools(server: McpServer) {
         }
     );
 
-    // Tool: get_shop
+    // Tool: shop_retrieve
     server.tool(
-        'get_shop',
+        'shop_retrieve',
         'Retrieve a specific shop registered on LocaBriques by its slug.',
         {
             slug: z.string().describe('The unique slug identifier of the shop.'),
@@ -67,6 +67,73 @@ export function registerShopsTools(server: McpServer) {
                         {
                             type: 'text',
                             text: `Could not fetch shop '${slug}': ${error.message}`,
+                        },
+                    ],
+                    isError: true,
+                };
+            }
+        }
+    );
+
+    // Tool: shop_list_sets
+    server.tool(
+        'shop_list_sets',
+        'List all sets rented in a specific shop on LocaBriques.',
+        {
+            slug: z.string().describe('Slug of the shop to look up'),
+        },
+        async ({ slug }) => {
+            try {
+                const response = await apiClient.get(`/api/shops/${slug}/sets/`);
+
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(response.data, null, 2),
+                        },
+                    ],
+                };
+            } catch (error: any) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: `Could not fetch sets for shop '${slug}': ${error.message}`,
+                        },
+                    ],
+                    isError: true,
+                };
+            }
+        }
+    );
+
+    // Tool: shop_retrieve_set
+    server.tool(
+        'shop_retrieve_set',
+        'Retrieve a specific set rented in a shop on LocaBriques.',
+        {
+            slug: z.string().describe('Slug of the shop to look up'),
+            id: z.string().describe('id of the set to retrieve'),
+        },
+        async ({ slug, id }) => {
+            try {
+                const response = await apiClient.get(`/api/shops/${slug}/sets/${id}/`);
+
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(response.data, null, 2),
+                        },
+                    ],
+                };
+            } catch (error: any) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: `Could not fetch set '${id}' from shop '${slug}': ${error.message}`,
                         },
                     ],
                     isError: true,
