@@ -4,6 +4,8 @@ A Model Context Protocol (MCP) server implementation for Locabriques, enabling A
 
 ## MCP Tools
 
+⚠️ Only Sets are supported. LightMybricks® and Customproducts are not supported on purpose due to limited usage on Locabriques and complexity of implementation.
+
 ### 🧱 LEGO® Sets Database
 
 | Tool Name | Description |
