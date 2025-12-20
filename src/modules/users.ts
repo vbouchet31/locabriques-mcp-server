@@ -30,10 +30,7 @@ export function registerUserTools(server: McpServer) {
                     ? JSON.stringify(error.response.data, null, 2)
                     : error.message;
 
-                // We use console.error for critical debugging as permitted, but no console.log
-                if (!error.response) {
-                    console.error('Critical error in user_list tool:', error);
-                }
+
 
                 return {
                     content: [
