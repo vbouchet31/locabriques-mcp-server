@@ -7,6 +7,9 @@ export const apiClient: AxiosInstance = axios.create({
     headers: {
         'User-Agent': 'LocaBriques-MCP/1.0.0',
         'Content-Type': 'application/json',
+        ...(process.env.LOCABRIQUES_API_TOKEN
+            ? { Authorization: `Token ${process.env.LOCABRIQUES_API_TOKEN}` }
+            : {}),
     },
 });
 
