@@ -12,6 +12,8 @@ vi.mock('../lib/api-client.js', () => ({
         get: vi.fn(),
         put: vi.fn(),
         patch: vi.fn(),
+        post: vi.fn(),
+        delete: vi.fn(),
     },
 }));
 
@@ -169,5 +171,101 @@ describe('Private My Shop Tools', () => {
             expect(apiClient.patch).toHaveBeenCalledWith('/api/my_shop/', expect.any(FormData), expect.any(Object));
         });
     });
+
+    // --- COUPONS TESTS ---
+
+    describe('myshop_list_coupons', () => {
+        it('should list coupons successfully', async () => {
+            const mockData = [{ id: 1, code: 'SAVE10', discount_value: 10 }];
+            vi.mocked(apiClient.get).mockResolvedValue({ data: mockData });
+
+            const result = await tools.myshop_list_coupons({});
+            expect(apiClient.get).toHaveBeenCalledWith('/api/my_shop/coupons/');
+            expect(JSON.parse(result.content[0].text)).toEqual(mockData);
+        });
+
+        it('should handle errors', async () => {
+            vi.mocked(apiClient.get).mockRejectedValue(new Error('API Error'));
+            const result = await tools.myshop_list_coupons({});
+            expect(result.isError).toBe(true);
+        });
+    });
+
+    describe('myshop_create_coupon', () => {
+        it('should create a coupon with correct JSON body', async () => {
+            const mockData = { id: 2, code: 'NEW20', discount_value: 20 };
+            const params = {
+                code: 'NEW20',
+                discount_value: 20,
+                discount_type: 'percent',
+                is_visible: true
+            };
+            vi.mocked(apiClient.post).mockResolvedValue({ data: mockData });
+
+            const result = await tools.myshop_create_coupon(params);
+            expect(apiClient.post).toHaveBeenCalledWith('/api/my_shop/coupons/', params);
+            expect(JSON.parse(result.content[0].text)).toEqual(mockData);
+        });
+    });
+
+    describe('myshop_retrieve_coupon', () => {
+        it('should retrieve a coupon by ID', async () => {
+            const mockData = { id: 3, code: 'GET30' };
+            vi.mocked(apiClient.get).mockResolvedValue({ data: mockData });
+
+            const result = await tools.myshop_retrieve_coupon({ id: 3 });
+            expect(apiClient.get).toHaveBeenCalledWith('/api/my_shop/coupons/3/');
+            expect(JSON.parse(result.content[0].text)).toEqual(mockData);
+        });
+    });
+
+    describe('myshop_update_coupon', () => {
+        it('should update a coupon (PUT) adhering to required fields', async () => {
+            const mockData = { id: 3, code: 'UPDATED' };
+            const params = {
+                id: 3,
+                code: 'UPDATED',
+                discount_value: 15,
+                discount_type: 'amount',
+                is_visible: false
+            };
+            // Remove id from body expectation
+            const { id, ...expectedBody } = params;
+
+            vi.mocked(apiClient.put).mockResolvedValue({ data: mockData });
+
+            const result = await tools.myshop_update_coupon(params);
+            expect(apiClient.put).toHaveBeenCalledWith('/api/my_shop/coupons/3/', expectedBody);
+            expect(JSON.parse(result.content[0].text)).toEqual(mockData);
+        });
+    });
+
+    describe('myshop_partial_update_coupon', () => {
+        it('should partially update a coupon (PATCH) allows sending only one field', async () => {
+            const mockData = { id: 3, code: 'PATCHED' };
+            const params = {
+                id: 3,
+                code: 'PATCHED'
+            };
+            const { id, ...expectedBody } = params;
+
+            vi.mocked(apiClient.patch).mockResolvedValue({ data: mockData });
+
+            const result = await tools.myshop_partial_update_coupon(params);
+            expect(apiClient.patch).toHaveBeenCalledWith('/api/my_shop/coupons/3/', expectedBody);
+            expect(JSON.parse(result.content[0].text)).toEqual(mockData);
+        });
+    });
+
+    describe('myshop_delete_coupon', () => {
+        it('should delete a coupon using DELETE method', async () => {
+            vi.mocked(apiClient.delete).mockResolvedValue({ data: {} });
+
+            const result = await tools.myshop_delete_coupon({ id: 99 });
+            expect(apiClient.delete).toHaveBeenCalledWith('/api/my_shop/coupons/99/');
+            expect(result.content[0].text).toContain('deleted successfully');
+        });
+    });
+
 });
 

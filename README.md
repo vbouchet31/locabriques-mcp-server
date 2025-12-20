@@ -37,6 +37,12 @@ A Model Context Protocol (MCP) server implementation for Locabriques, enabling A
 | `myshop_retrieve` | Retrieve your shop data |
 | `myshop_update` | Update your shop info (supports image via URL or Base64) |
 | `myshop_partial_update` | Partially update your shop information (supports image via URL or Base64) |
+| `myshop_list_coupons` | List all coupons in your shop |
+| `myshop_create_coupon` | Register a new coupon set in your shop |
+| `myshop_retrieve_coupon` | Retrieve a coupon from your shop |
+| `myshop_update_coupon` | Update a coupon in your shop |
+| `myshop_partial_update_coupon` | Partially update a coupon in your shop |
+| `myshop_delete_coupon` | Remove a coupon from your shop |
 
 ### 🎨 Themes
 
