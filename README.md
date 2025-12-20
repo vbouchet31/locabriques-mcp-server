@@ -22,6 +22,14 @@ A Model Context Protocol (MCP) server implementation for Locabriques, enabling A
 | `shop_list_sets` | List all sets rented in a specific shop | `GET /api/shops/{slug}/sets/` |
 | `shop_retrieve_set` | Retrieve a specific set rented in a shop | `GET /api/shops/{slug}/sets/{id}/` |
 
+### 📚 Catalogs
+
+| Tool Name | Description | Endpoint |
+| :--- | :--- | :--- |
+| `catalog_list` | List all available catalogs | `GET /api/catalogs/` |
+| `catalog_list_sets` | List all LEGO® sets available for rental on LocaBriques | `GET /api/catalogs/sets/` |
+| `catalog_retrieve_set` | Retrieve a specific LEGO® set available for rental | `GET /api/catalogs/sets/{lego_id}/` |
+
 ## Installation
 
 ### Quick Setup for Claude Desktop
