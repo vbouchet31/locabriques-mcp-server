@@ -6,29 +6,36 @@ A Model Context Protocol (MCP) server implementation for Locabriques, enabling A
 
 ### 🧱 LEGO® Sets Database
 
-| Tool Name | Description | Endpoint |
-| :--- | :--- | :--- |
-| `legoset_search_brickset` | Search the external Brickset API to find LEGO set IDs for registration | `GET /api/brickset/search/` |
-| `legoset_search` | Search sets in our LEGO® sets database | `GET /api/legosets/` |
-| `legoset_retrieve` | Retrieve a LEGO® set from our database | `GET /api/legosets/{id}/` |
-| `legoset_register` | Register a new set in our LEGO® sets database, based on brickset API | `POST /api/legosets/register_from_brickset` |
+| Tool Name | Description |
+| :--- | :--- |
+| `legoset_search_brickset` | Search the external Brickset API to find LEGO set IDs for registration |
+| `legoset_search` | Search sets in our LEGO® sets database |
+| `legoset_retrieve` | Retrieve a LEGO® set from our database |
+| `legoset_register` | Register a new set in our LEGO® sets database, based on brickset API |
 
 ### 🛍️ Shops
 
-| Tool Name | Description | Endpoint |
-| :--- | :--- | :--- |
-| `shops_list` | List all shops registered on LocaBriques | `GET /api/shops/` |
-| `shop_retrieve` | Retrieve a specific shop by its slug | `GET /api/shops/{slug}/` |
-| `shop_list_sets` | List all sets rented in a specific shop | `GET /api/shops/{slug}/sets/` |
-| `shop_retrieve_set` | Retrieve a specific set rented in a shop | `GET /api/shops/{slug}/sets/{id}/` |
+| Tool Name | Description |
+| :--- | :--- |
+| `shops_list` | List all shops registered on LocaBriques |
+| `shop_retrieve` | Retrieve a specific shop by its slug |
+| `shop_list_sets` | List all sets rented in a specific shop |
+| `shop_retrieve_set` | Retrieve a specific set rented in a shop |
 
 ### 📚 Catalogs
 
-| Tool Name | Description | Endpoint |
-| :--- | :--- | :--- |
-| `catalog_list` | List all available catalogs | `GET /api/catalogs/` |
-| `catalog_list_sets` | List all LEGO® sets available for rental on LocaBriques | `GET /api/catalogs/sets/` |
-| `catalog_retrieve_set` | Retrieve a specific LEGO® set available for rental | `GET /api/catalogs/sets/{lego_id}/` |
+| Tool Name | Description |
+| :--- | :--- |
+| `catalog_list` | List all available catalogs |
+| `catalog_list_sets` | List all LEGO® sets available for rental on LocaBriques |
+| `catalog_retrieve_set` | Retrieve a specific LEGO® set available for rental |
+
+### 🎨 Themes
+
+| Tool Name | Description |
+| :--- | :--- |
+| `theme_search` | Search themes in our LEGO® sets database |
+| `theme_retrieve` | Retrieve a LEGO® theme from our database |
 
 ## Installation
 
