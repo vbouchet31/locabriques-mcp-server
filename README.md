@@ -32,6 +32,13 @@ A Model Context Protocol (MCP) server implementation for Locabriques, enabling A
 | `catalog_list_sets` | List all LEGO® sets available for rental on LocaBriques |
 | `catalog_retrieve_set` | Retrieve a specific LEGO® set available for rental |
 
+### 📦 Inventories
+
+| Tool Name | Description |
+| :--- | :--- |
+| `inventory_list` | Search sets in our inventory database. |
+| `inventory_retrieve` | Retrieve a specific inventory. |
+
 ### 🏪 My Shop
 
 | Tool Name | Description |
