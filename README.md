@@ -92,20 +92,19 @@ A Model Context Protocol (MCP) server implementation for Locabriques, enabling A
 
 ## Installation
 
-### Quick Setup for Claude Desktop
+### Method 1: Using NPX (Recommended)
+This is the simplest way. You don't need to install anything globally. 
+Add this to your Claude Desktop configuration:
 
-1. Install the package:
-```bash
-npm install -g locabriques-mcp-server
-```
-
-2. Add to your Claude Desktop configuration (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS or `%APPDATA%\Claude\claude_desktop_config.json` on Windows):
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
 ```json
 {
   "mcpServers": {
-    "locabriques-mcp-server": {
-      "command": "locabriques-mcp-server",
+    "locabriques": {
+      "command": "npx",
+      "args": ["-y", "@vbouchet31/locabriques-mcp-server"],
       "env": {
         "LOCABRIQUES_API_KEY": "your_locabriques_api_key_here"
       }
@@ -114,16 +113,20 @@ npm install -g locabriques-mcp-server
 }
 ```
 
-### Alternative: Using NPX (No Installation Required)
+### Method 2: Global Installation
+If you prefer to have the binary installed locally:
 
-Add this to your Claude Desktop configuration:
+```bash
+npm install -g @vbouchet31/locabriques-mcp-server
+```
+
+Add this to your configuration:
 
 ```json
 {
   "mcpServers": {
     "locabriques": {
-      "command": "npx",
-      "args": ["-y", "locabriques-mcp-server"],
+      "command": "locabriques-mcp",
       "env": {
         "LOCABRIQUES_API_KEY": "your_locabriques_api_key_here"
       }
@@ -156,7 +159,7 @@ Add the following JSON block to your User Settings (JSON) file in VS Code. You c
     "servers": {
       "locabriques": {
         "command": "npx",
-        "args": ["-y", "locabriques-mcp-server"],
+        "args": ["-y", "@vbouchet31/locabriques-mcp-server"],
         "env": {
           "LOCABRIQUES_API_KEY": "${input:apiKey}"
         }
@@ -181,7 +184,7 @@ Optionally, you can add it to a file called `.vscode/mcp.json` in your workspace
   "servers": {
     "locabriques": {
       "command": "npx",
-      "args": ["-y", "locabriques-mcp-server"],
+      "args": ["-y", "@vbouchet31/locabriques-mcp-server"],
       "env": {
         "LOCABRIQUES_API_KEY": "${input:apiKey}"
       }

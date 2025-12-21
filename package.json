@@ -5,10 +5,9 @@
   "homepage": "https://github.com/vbouchet31/locabriques-mcp-server",
   "issues": "https://github.com/vbouchet31/locabriques-mcp-server/issues",
   "type": "module",
-  "access": "public",
   "main": "dist/index.js",
   "bin": {
-    "@vbouchet31/locabriques-mcp-server": "./dist/index.js"
+    "locabriques-mcp": "./dist/index.js"
   },
   "files": [
     "dist"
@@ -19,9 +18,13 @@
     "prepublishOnly": "npm run build",
     "test": "vitest run"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "mcp",
-    "locabriques"
+    "locabriques",
+    "model-context-protocol"
   ],
   "author": "Vincent Bouchet",
   "license": "MIT",
@@ -38,5 +41,8 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "vitest": "^4.0.16"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
