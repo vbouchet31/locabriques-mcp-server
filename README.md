@@ -59,11 +59,18 @@ A Model Context Protocol (MCP) server implementation for Locabriques, enabling A
 | `theme_search` | Search themes in our LEGO® sets database |
 | `theme_retrieve` | Retrieve a LEGO® theme from our database |
 
+### 👤 My Account
+
+| Tool Name | Description |
+| :--- | :--- |
+| `account_list_stock_alerts` | List all your 'back in stock' alerts |
+| `account_delete_stock_alert` | Remove a 'back in stock' alert |
+
 ### 👤 Users
 
-| Tool Name | Description | Endpoint |
-| :--- | :--- | :--- |
-| `user_list` | List all users registered on LocaBriques whose username matches 'searched_string' | GET /api/users/ |
+| Tool Name | Description |
+| :--- | :--- |
+| `user_list` | List all users registered on LocaBriques whose username matches 'searched_string' |
 
 ## Installation
 
