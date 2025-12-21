@@ -8,6 +8,7 @@ import { apiClient } from '../lib/api-client.js';
 vi.mock('../lib/api-client.js', () => ({
     apiClient: {
         get: vi.fn(),
+        post: vi.fn(),
         delete: vi.fn(),
     },
 }));
@@ -86,6 +87,89 @@ describe('My Account Module', () => {
 
             expect(result.isError).toBe(true);
             expect(result.content[0].text).toBe('Not Found');
+        });
+    });
+
+
+    describe('account_list_wishlist', () => {
+        it('should register account_list_wishlist tool', () => {
+            expect(tools).toHaveProperty('account_list_wishlist');
+        });
+
+        it('should call API correctly and list wishlist items', async () => {
+            const handler = tools['account_list_wishlist'].handler;
+            const mockData = [
+                { id: 101, legoset: { lego_id: "10333", name: "Barad-dûr" }, registration_date: "2024-01-01" },
+            ];
+            (apiClient.get as any).mockResolvedValue({ data: mockData });
+
+            const result = await handler({});
+
+            expect(apiClient.get).toHaveBeenCalledWith('/api/my_account/wishlist/');
+            expect(JSON.parse(result.content[0].text)).toEqual(mockData);
+        });
+
+        it('should handle API errors gracefully', async () => {
+            const handler = tools['account_list_wishlist'].handler;
+            (apiClient.get as any).mockRejectedValue(new Error('API Failure'));
+
+            const result = await handler({});
+
+            expect(result.isError).toBe(true);
+            expect(result.content[0].text).toBe('API Failure');
+        });
+    });
+
+    describe('account_create_wishlist_item', () => {
+        it('should register account_create_wishlist_item tool', () => {
+            expect(tools).toHaveProperty('account_create_wishlist_item');
+        });
+
+        it('should call API correctly to add wishlist item', async () => {
+            const handler = tools['account_create_wishlist_item'].handler;
+            const mockResponse = { id: 102, legoset_lego_id: "75192" };
+            (apiClient.post as any).mockResolvedValue({ data: mockResponse });
+
+            const result = await handler({ legoset_lego_id: "75192" });
+
+            expect(apiClient.post).toHaveBeenCalledWith('/api/my_account/wishlist/', { legoset_lego_id: "75192" });
+            expect(JSON.parse(result.content[0].text)).toEqual(mockResponse);
+        });
+
+        it('should handle API errors gracefully', async () => {
+            const handler = tools['account_create_wishlist_item'].handler;
+            (apiClient.post as any).mockRejectedValue(new Error('Creation Failed'));
+
+            const result = await handler({ legoset_lego_id: "75192" });
+
+            expect(result.isError).toBe(true);
+            expect(result.content[0].text).toBe('Creation Failed');
+        });
+    });
+
+    describe('account_delete_wishlist_item', () => {
+        it('should register account_delete_wishlist_item tool', () => {
+            expect(tools).toHaveProperty('account_delete_wishlist_item');
+        });
+
+        it('should call API correctly to delete wishlist item', async () => {
+            const handler = tools['account_delete_wishlist_item'].handler;
+            (apiClient.delete as any).mockResolvedValue({});
+
+            const result = await handler({ id: 202 });
+
+            expect(apiClient.delete).toHaveBeenCalledWith('/api/my_account/wishlist/202/');
+            expect(result.content[0].text).toBe("Set removed from your wish list");
+        });
+
+        it('should handle API errors gracefully', async () => {
+            const handler = tools['account_delete_wishlist_item'].handler;
+            (apiClient.delete as any).mockRejectedValue(new Error('Delete Failed'));
+
+            const result = await handler({ id: 202 });
+
+            expect(result.isError).toBe(true);
+            expect(result.content[0].text).toBe('Delete Failed');
         });
     });
 });
