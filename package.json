@@ -1,11 +1,14 @@
 {
-  "name": "locabriques-mcp",
+  "name": "@vbouchet31/locabriques-mcp-server",
   "version": "1.0.0",
   "description": "MCP Server for LocaBriques API",
+  "homepage": "https://github.com/vbouchet31/locabriques-mcp-server",
+  "issues": "https://github.com/vbouchet31/locabriques-mcp-server/issues",
   "type": "module",
+  "access": "public",
   "main": "dist/index.js",
   "bin": {
-    "locabriques-mcp": "./dist/index.js"
+    "@vbouchet31/locabriques-mcp-server": "./dist/index.js"
   },
   "files": [
     "dist"
@@ -20,8 +23,8 @@
     "mcp",
     "locabriques"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": "Vincent Bouchet",
+  "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.1",
     "axios": "^1.13.2",

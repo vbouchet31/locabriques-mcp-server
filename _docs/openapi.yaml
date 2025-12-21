@@ -1,0 +1,5717 @@
+openapi: 3.0.3
+info:
+  title: LocaBriques API
+  version: 0.0.1
+  description: 'API for programmatic interactions with LocaBriques services. See https://locabriques.fr/about-api
+    for more info ! (or feel free to contact us: https://locabriques.fr/contact)'
+paths:
+  /api/brickset/search/:
+    get:
+      operationId: brickset_search_list
+      description: This action allows you to search for sets in brickset API.
+      summary: Search brickset API
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Query string to apply. If not set, we will ask Brickset for most
+          recent sets
+      tags:
+      - Explore our LEGO® sets database
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBricksetSearchResultList'
+          description: Registered set in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+  /api/catalogs/:
+    get:
+      operationId: catalogs_retrieve
+      summary: List all our catalogs
+      tags:
+      - Explore our catalogs
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          description: Links to our different catalogs. Dict of name -> link
+  /api/catalogs/customproducts/:
+    get:
+      operationId: catalogs_customproducts_list
+      description: This action allows you to list all custom products available for
+        rental in our owners's shops
+      summary: List all custom products available for rental on LocaBriques
+      parameters:
+      - in: query
+        name: exclude_mine
+        schema:
+          type: boolean
+          default: false
+        description: If you are authenticated and own a shop, exclude from results
+          the products present in your shop inventory
+      - in: query
+        name: exclude_no_rates
+        schema:
+          type: boolean
+          default: false
+        description: Limit results to products that have at least one review
+      - in: query
+        name: exclude_not_available
+        schema:
+          type: boolean
+          default: false
+        description: Limit results to products currently available (set to 'true'
+          to enable)
+      - in: query
+        name: max_price
+        schema:
+          type: integer
+        description: Limit results to products proposed for at most the given price
+          (in euros).
+      - in: query
+        name: max_rate
+        schema:
+          type: integer
+        description: Limit results to products whose average rating is at most the
+          given number
+      - in: query
+        name: min_price
+        schema:
+          type: integer
+        description: Limit results to products proposed for at least the given price
+          (in euros)
+      - in: query
+        name: min_rate
+        schema:
+          type: integer
+        description: Limit results to products whose average rating is at least the
+          given number
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: product_type
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - BULK
+            - MOC
+            - OTHER
+        description: Limit results to specific product type(s)
+      - in: query
+        name: searched_string
+        schema:
+          type: string
+          default: ''
+        description: Limit results to sets matching this parameter in their name or
+          description. If multiple words are specified, they will  be splited and
+          resulting sets will match every word.
+      tags:
+      - Explore our catalogs
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCatalogCustomProductList'
+          description: List products in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '406':
+          description: Business logic problem (more info in response body)
+  /api/catalogs/customproducts/{id}/:
+    get:
+      operationId: catalogs_customproducts_retrieve
+      description: This action retrieves a LEGO® set present in at least one of our
+        shops
+      summary: Retrieve a LEGO® set available for rental on LocaBriques
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this MOC/vrac/autre.
+        required: true
+      - in: path
+        name: lego_id
+        schema:
+          type: string
+        description: The LEGO® identifier of the set to retrieve
+        required: true
+      tags:
+      - Explore our catalogs
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogCustomProduct'
+          description: Get product in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '404':
+          description: Not found
+  /api/catalogs/lightmybricks_kits/:
+    get:
+      operationId: catalogs_lightmybricks_kits_list
+      description: This action allows you to list all LightMybricks® (https://lightmybricks.com)
+        available for rental on LocaBriques
+      summary: List all LightMybricks® available for rental on LocaBriques
+      parameters:
+      - in: query
+        name: exclude_no_rates
+        schema:
+          type: boolean
+          default: false
+        description: Limit results to lightkits that have at least one review
+      - in: query
+        name: exclude_not_available
+        schema:
+          type: boolean
+          default: false
+        description: Limit results to lightkits currently available (set to 'true'
+          to enable)
+      - in: query
+        name: include_availability
+        schema:
+          type: boolean
+          default: false
+        description: Include availabilities for the lightkits (see CatalogLMBLightKitSerializer
+          documentation). Set to "true" to activate
+      - in: query
+        name: include_images
+        schema:
+          type: boolean
+          default: false
+        description: Include all images for the lightkits (see CatalogLMBLightKitSerializer
+          documentation). Set to "true" to activate
+      - in: query
+        name: max_price
+        schema:
+          type: integer
+        description: Limit results to lightkits proposed for at most the given price
+          (in euros).
+      - in: query
+        name: max_rate
+        schema:
+          type: integer
+        description: Limit results to lightkits whose average rating is at most the
+          given number
+      - in: query
+        name: min_price
+        schema:
+          type: integer
+        description: Limit results to lightkits proposed for at least the given price
+          (in euros)
+      - in: query
+        name: min_rate
+        schema:
+          type: integer
+        description: Limit results to lightkits whose average rating is at least the
+          given number
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: searched_string
+        schema:
+          type: string
+          default: ''
+        description: Limit results to lightkits matching this parameter in their name
+          or description. If multiple words are specified, they will  be splited and
+          resulting lightkits will match every word.
+      tags:
+      - Explore our catalogs
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCatalogLMBLightKitList'
+          description: List products in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '406':
+          description: Business logic problem (more info in response body)
+  /api/catalogs/lightmybricks_kits/{id}/:
+    get:
+      operationId: catalogs_lightmybricks_kits_retrieve
+      description: This action retrieves a LightMybricks® (https://lightmybricks.com)
+        lightkit present on LocaBriques
+      summary: Retrieve a LightMybricks® lightkit available for rental on LocaBriques
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: The identifier of the lightkit to retrieve
+        required: true
+      tags:
+      - Explore our catalogs
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogLMBLightKit'
+          description: Get lightkit in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '404':
+          description: Not found
+  /api/catalogs/sets/:
+    get:
+      operationId: catalogs_sets_list
+      description: This action allows you to list all LEGO® sets available for rental
+        in our owners's shops
+      summary: List all LEGO® sets available for rental on LocaBriques
+      parameters:
+      - in: query
+        name: exclude_mine
+        schema:
+          type: boolean
+          default: false
+        description: If you are authenticated and own a shop, exclude from results
+          the sets present in your shop inventory
+      - in: query
+        name: exclude_no_rates
+        schema:
+          type: boolean
+          default: false
+        description: Limit results to sets that have at least one review
+      - in: query
+        name: exclude_not_available
+        schema:
+          type: boolean
+          default: false
+        description: Limit results to sets currently available (set to 'true' to enable)
+      - in: query
+        name: include_availability
+        schema:
+          type: boolean
+          default: false
+        description: Include availabilities for the sets (see CatalogLegoSetSerializer
+          documentation). Set to "true" to activate
+      - in: query
+        name: include_images
+        schema:
+          type: boolean
+          default: false
+        description: Include all images for the sets (see CatalogLegoSetSerializer
+          documentation). Set to "true" to activate
+      - in: query
+        name: max_age
+        schema:
+          type: integer
+        description: Limit results to sets whose age category is at most the given
+          one. 19 is used for '18+'
+      - in: query
+        name: max_part_count
+        schema:
+          type: integer
+        description: Limit results to sets containing at most this number of parts
+      - in: query
+        name: max_price
+        schema:
+          type: integer
+        description: Limit results to sets proposed for at most the given price (in
+          euros).
+      - in: query
+        name: max_rate
+        schema:
+          type: integer
+        description: Limit results to sets whose average rating is at most the given
+          number
+      - in: query
+        name: min_age
+        schema:
+          type: integer
+        description: Limit results to sets whose age category is at least the given
+          one
+      - in: query
+        name: min_part_count
+        schema:
+          type: integer
+        description: Limit results to sets containing at least this number of parts
+      - in: query
+        name: min_price
+        schema:
+          type: integer
+        description: Limit results to sets proposed for at least the given price (in
+          euros)
+      - in: query
+        name: min_rate
+        schema:
+          type: integer
+        description: Limit results to sets whose average rating is at least the given
+          number
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: searched_string
+        schema:
+          type: string
+          default: ''
+        description: Limit results to sets matching this parameter in their name,
+          headline, description or lego_id (and some custom keywords we might add
+          based on our users common spelling mistakes !). If multiple words are specified,
+          they will be splited and resulting sets will match every word.
+      - in: query
+        name: sort
+        schema:
+          type: string
+          enum:
+          - -_average_rate
+          - -name
+          - -release_year
+          - -rental_price
+          - _average_rate
+          - name
+          - newest
+          - release_year
+          - rental_price
+          default: newest
+        description: Result ordering. Newest means "most recently added to our catalog
+          first. Please notice the underscore before average rate, its mandatory and
+          due to internal reasons. This relies on set reviews left by our user. Other
+          values should be straightforward to understand.
+      - in: query
+        name: sorting_type
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - BAG_NUMBER
+            - COLOR
+            - OTHER
+        description: Limit results to sets are available with specific sorting type
+      - in: query
+        name: theme
+        schema:
+          type: string
+        description: Limit results to sets if their theme (or parent theme) matches
+          parameter (slug is used instead of name). This parameter can be used several
+          times in a single call, results will then be merged.
+      tags:
+      - Explore our catalogs
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCatalogLegoSetList'
+          description: List sets in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '406':
+          description: Business logic problem (more info in response body)
+  /api/catalogs/sets/{lego_id}/:
+    get:
+      operationId: catalogs_sets_retrieve
+      description: This action retrieves a LEGO® set present in at least one of our
+        shops
+      summary: Retrieve a LEGO® set available for rental on LocaBriques
+      parameters:
+      - in: path
+        name: lego_id
+        schema:
+          type: string
+        description: The LEGO® identifier of the set to retrieve
+        required: true
+      tags:
+      - Explore our catalogs
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogLegoSet'
+          description: Get set in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '404':
+          description: Not found
+  /api/inventories/:
+    get:
+      operationId: inventories_list
+      description: This action allows you to search inventories in our sets inventory
+        database.
+      summary: 'Search sets in our inventory database, which details how sets parts
+        are split in numbered bags '
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Search inventories by set name or reference.
+      tags:
+      - Explore our original sets inventories database, detailing how parts are split
+        in numbered bags
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSetInventoryList'
+          description: List inventories in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+  /api/inventories/{id}/:
+    get:
+      operationId: inventories_retrieve
+      description: This action retrieves an inventory present in our database
+      summary: Retrieve an inventory from our sets inventory database
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Per-bags inventory.
+        required: true
+      tags:
+      - Explore our original sets inventories database, detailing how parts are split
+        in numbered bags
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetInventoryWithBags'
+          description: Get inventory in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '404':
+          description: Not found
+  /api/inventories/mine/:
+    get:
+      operationId: inventories_mine_list
+      description: This action allows you to retrieve your own (not yet published)
+        per-bags set inventories
+      summary: List your own per-bags set inventories
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - Manage your own per-bags set inventories and contribute to our community database
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMySetInventoryList'
+          description: List inventories in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+    post:
+      operationId: inventories_mine_create
+      description: 'This action allows you to create a new per-bags inventory for
+        a set using it''s LEGO id (for example ''10333-1'' for ''The Lord of the Rings:
+        Barad-dûr''). The created inventory will be onlyvisible and updatable by you,
+        until it''s published'
+      summary: Register a new per-bags set inventory
+      tags:
+      - Manage your own per-bags set inventories and contribute to our community database
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSetInventory'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateSetInventory'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateSetInventory'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateSetInventory'
+          description: Created. New inventory in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '406':
+          description: Business logic problem (more info in response body)
+  /api/inventories/mine/{id}/bags/:
+    get:
+      operationId: inventories_mine_bags_list
+      description: This action allows you to list all bags present in an inventory
+      summary: List all bags from an inventory
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: ID of the inventory to look up
+        required: true
+      tags:
+      - Manage your own per-bags set inventories and contribute to our community database
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BagInventory'
+          description: List inventory basg in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+    post:
+      operationId: inventories_mine_bags_create
+      description: This action allows you to create a new bag in your per-bags set
+        inventory
+      summary: Create a new bag in your inventory
+      parameters:
+      - in: query
+        name: bag_number
+        schema:
+          type: string
+          maxLength: 32
+          minLength: 1
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: ID of the inventory to add bag to
+        required: true
+      tags:
+      - Manage your own per-bags set inventories and contribute to our community database
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBagInventory'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateBagInventory'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateBagInventory'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BagInventory'
+          description: Created. New bag in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have access to this inventory)
+        '406':
+          description: Business logic problem (more info in response body)
+  /api/inventories/mine/{id}/bags/{bag_number_slug}/:
+    get:
+      operationId: inventories_mine_bags_retrieve
+      description: This action retrieves a bag present in an inventory
+      summary: Retrieve a bag present in an inventory
+      parameters:
+      - in: path
+        name: bag_number_slug
+        schema:
+          type: string
+        description: bag number to retrieve
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: ID of the inventory to look up
+        required: true
+      tags:
+      - Manage your own per-bags set inventories and contribute to our community database
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BagInventory'
+          description: Get inventory bag in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have access to this inventory)
+        '404':
+          description: Not found
+    put:
+      operationId: inventories_mine_bags_update
+      description: This action allows you to change the number (or name) of a bag
+        present in one of your own (not published yet) per-bag inventories
+      summary: Change number of a bag  in an inventory
+      parameters:
+      - in: query
+        name: bag_number
+        schema:
+          type: string
+          maxLength: 32
+          minLength: 1
+        required: true
+      - in: path
+        name: bag_number_slug
+        schema:
+          type: string
+        description: Slug of the name of the bag to update
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: ID of the inventory containing the bag to update
+        required: true
+      tags:
+      - Manage your own per-bags set inventories and contribute to our community database
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBagInventory'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateBagInventory'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateBagInventory'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BagInventory'
+          description: Updated. New bag representation in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have access to this inventory)
+        '406':
+          description: Business logic problem (more info in response body)
+    patch:
+      operationId: inventories_mine_bags_partial_update
+      description: This action allows you to update content of a bag in one of your
+        own per-bags inventory
+      summary: Update content of a bag in one of your own (not yet published) per-bags
+        inventories
+      parameters:
+      - in: path
+        name: bag_number_slug
+        schema:
+          type: string
+        description: Slug of the name of the bag to update
+        required: true
+      - in: query
+        name: color_id
+        schema:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+          minLength: 1
+        description: Rebrickable color reference
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: ID of the inventory containing the bag to update
+        required: true
+      - in: query
+        name: part_num
+        schema:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+          minLength: 1
+        description: Rebrickable part reference
+        required: true
+      - in: query
+        name: quantity_used
+        schema:
+          type: integer
+        description: Quantity of part (part_num+color) present in the bag
+        required: true
+      tags:
+      - Manage your own per-bags set inventories and contribute to our community database
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateBagInventory'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateBagInventory'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateBagInventory'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BagInventoryUpdateResponse'
+          description: Inventory successfully updated. Part count delta in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Permission denied (more info in response body)
+        '404':
+          description: Not found
+    delete:
+      operationId: inventories_mine_bags_destroy
+      description: This action allows you to delete a bag from one of your own per-bags
+        set inventory
+      summary: Delete a bag from one of your inventories
+      parameters:
+      - in: path
+        name: bag_number_slug
+        schema:
+          type: string
+        description: Slug of the bag to delete
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: ID of the inventory to delete bag from
+        required: true
+      tags:
+      - Manage your own per-bags set inventories and contribute to our community database
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: Bag deleted
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have access to this inventory)
+        '406':
+          description: Business logic problem (more info in response body)
+  /api/inventories/mine/{id}/:
+    get:
+      operationId: inventories_mine_retrieve
+      description: This action retrieves one of your own per-bags inventory
+      summary: Retrieve one of your own (not yet published) per-bags inventories
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Per-bags inventory.
+        required: true
+      tags:
+      - Manage your own per-bags set inventories and contribute to our community database
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MySetInventoryWithBags'
+          description: Get inventory in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '404':
+          description: Not found
+    delete:
+      operationId: inventories_mine_destroy
+      description: This action allows you to delete one of your pending (not published)
+        per-bag inventories.
+      summary: Delete one of your (not published) per-bag inventories
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Per-bags inventory.
+        required: true
+      tags:
+      - Manage your own per-bags set inventories and contribute to our community database
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: Inventory deleted
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have access to this inventory)
+        '406':
+          description: Business logic problem (more info in response body)
+  /api/legosets/:
+    get:
+      operationId: legosets_list
+      description: This action allows you to search sets in our entire LEGO® sets
+        database.
+      summary: Search sets in our LEGO® sets database
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Search sets by name, description, headline or LEGO® identifier.
+          Only sets matching the whole string will be returned. This detabase only
+          contains sets that have been previously integrated by a user.
+      tags:
+      - Explore our LEGO® sets database
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLegoSetList'
+          description: List sets in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+  /api/legosets/{id}/:
+    get:
+      operationId: legosets_retrieve
+      description: This action retrieves a LEGO® set present in our database
+      summary: Retrieve a LEGO® set from our database
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this lego set.
+        required: true
+      tags:
+      - Explore our LEGO® sets database
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegoSet'
+          description: Get set in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '404':
+          description: Not found
+  /api/legosets/register_from_brickset:
+    post:
+      operationId: legosets_register_from_brickset_create
+      description: 'This action allows you to register a new set in our LEGO® sets
+        database. It''s based on brickset API : given a brickset id, we call the API,
+        retrieve set data, and register it in our database. As we need some mandatory
+        info, this call can fail in case some is missing. In this case, our team is
+        automatically informed and will register the set manually (so no need to retry)'
+      summary: Register a new set in our LEGO® sets database, based on brickset API
+      tags:
+      - Explore our LEGO® sets database
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BricksetSetParam'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BricksetSetParam'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BricksetSetParam'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegoSet'
+          description: Registered set in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '500':
+          description: Import has failed for some reason. Team informed.
+  /api/my_account/backinstockalerts/:
+    get:
+      operationId: my_account_backinstockalerts_list
+      description: This action allows you to list all sets in your 'back in stock'
+        alerts.
+      summary: List all your 'back in stock' alerts
+      tags:
+      - Manage your favorites
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BackInStockAlert'
+          description: List 'back in stock' alerts in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have an account)
+  /api/my_account/backinstockalerts/{id}/:
+    delete:
+      operationId: my_account_backinstockalerts_destroy
+      description: This action allows you to remove a 'back in stock' alert.
+      summary: Remove a 'back in stock' alert
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this back in stock alert.
+        required: true
+      tags:
+      - Manage your favorites
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: Alert removed from your list
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have an account, or your token is not
+            authorized for write access)
+        '406':
+          description: Business logic problem (more info in response body)
+  /api/my_account/wishlist/:
+    get:
+      operationId: my_account_wishlist_list
+      description: This action allows you to list all sets in your wish list.
+      summary: List all sets in your wish list
+      tags:
+      - Manage your favorites
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WishListItem'
+          description: List wish list items in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have an account)
+    post:
+      operationId: my_account_wishlist_create
+      description: 'This action allows you to add a new set in your wish list. You
+        specify the set to add by using it''s LEGO id (for example ''10333-1'' for
+        ''The Lord of the Rings: Barad-dûr''). This action supposes, for now, that
+        the sets has already been registered in our database.'
+      summary: Add a new set in your wish list
+      tags:
+      - Manage your favorites
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWishListItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateWishListItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateWishListItem'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateWishListItem'
+          description: Created. New wish list item in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have an account, or your token is not
+            authorized for write access)
+        '406':
+          description: Business logic problem (more info in response body)
+  /api/my_account/wishlist/{id}/:
+    delete:
+      operationId: my_account_wishlist_destroy
+      description: This action allows you to remove a set present in your wish list.
+      summary: Remove a set from your wish list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this wish list item.
+        required: true
+      tags:
+      - Manage your favorites
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: Set removed from your wish list
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have an account, or your token is not
+            authorized for write access)
+        '406':
+          description: Business logic problem (more info in response body)
+  /api/my_shop/:
+    get:
+      operationId: my_shop_retrieve
+      description: This action retrieves data about your shop on LocaBriques
+      summary: Retrieve your shop data
+      tags:
+      - Manage your shop info
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateShop'
+          description: Get shop data in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop)
+        '404':
+          description: Not found
+    put:
+      operationId: my_shop_update
+      description: This action allows you to update your shop information. You must
+        specify all the mandatory fields.
+      summary: Update your shop info
+      tags:
+      - Manage your shop info
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UpdateShop'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdateShop'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateShop'
+          description: Updated. New set representation in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop, or your token is not authorized
+            for write access)
+        '406':
+          description: Business logic problem (more info in response body)
+    patch:
+      operationId: my_shop_partial_update
+      description: This action allows you to update your shop information. You can
+        specify only fields you want to update
+      summary: Partially update your shop information
+      tags:
+      - Manage your shop info
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateShop'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateShop'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateShop'
+          description: Updated. New set representation in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop, or your token is not authorized
+            for write access)
+        '406':
+          description: Business logic problem (more info in response body)
+  /api/my_shop/coupons/:
+    get:
+      operationId: my_shop_coupons_list
+      description: This action allows you to list all coupons in your shop.
+      summary: List all coupons in your shop
+      tags:
+      - Manage your shop inventory
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PrivateCoupon'
+          description: List coupons in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop)
+    post:
+      operationId: my_shop_coupons_create
+      description: This action allows you to add a new coupon in your shop.
+      summary: Register a new coupon set in your shop
+      tags:
+      - Manage your shop inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrivateCoupon'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PrivateCoupon'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PrivateCoupon'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateCoupon'
+          description: Created. New coupon in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop, or your token is not authorized
+            for write access)
+        '406':
+          description: Business logic problem (more info in response body)
+  /api/my_shop/coupons/{id}/:
+    get:
+      operationId: my_shop_coupons_retrieve
+      description: This action retrieves a coupon present in your shop inventory
+      summary: Retrieve a coupon from your shop
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this coupon.
+        required: true
+      tags:
+      - Manage your shop inventory
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateCoupon'
+          description: Get coupon in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop)
+        '404':
+          description: Not found
+    put:
+      operationId: my_shop_coupons_update
+      description: This action allows you to update a coupon present in your shop.
+        You must specify all the mandatory fields.
+      summary: Update a coupon in your shop
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this coupon.
+        required: true
+      tags:
+      - Manage your shop inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrivateCoupon'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PrivateCoupon'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PrivateCoupon'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateCoupon'
+          description: Updated. New coupon representation in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop, or your token is not authorized
+            for write access)
+        '406':
+          description: Business logic problem (more info in response body)
+    patch:
+      operationId: my_shop_coupons_partial_update
+      description: This action allows you to update some fields if a coupon present
+        in your shop.
+      summary: Partially update a coupon in your shop
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this coupon.
+        required: true
+      tags:
+      - Manage your shop inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPrivateCoupon'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPrivateCoupon'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPrivateCoupon'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateCoupon'
+          description: Updated. New coupon representation in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop, or your token is not authorized
+            for write access)
+        '406':
+          description: Business logic problem (more info in response body)
+    delete:
+      operationId: my_shop_coupons_destroy
+      description: This action allows you to remove a coupon present in your shop.
+      summary: Remove a coupon from your shop
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this coupon.
+        required: true
+      tags:
+      - Manage your shop inventory
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: Coupon removed from your shop
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop, or your token is not authorized
+            for write access)
+        '406':
+          description: Business logic problem (more info in response body)
+  /api/my_shop/customproducts/:
+    get:
+      operationId: my_shop_customproducts_list
+      description: This action allows you to list all custom products in your shop
+        inventory.
+      summary: List all custom products in your inventory
+      tags:
+      - Manage your shop inventory
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PrivateCustomProduct'
+          description: List custom products in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop)
+    post:
+      operationId: my_shop_customproducts_create
+      description: This action allows you to add a new custom product in your shop
+        inventory.
+      summary: Register a new custom product in your inventory
+      tags:
+      - Manage your shop inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCustomProduct'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateCustomProduct'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateCustomProduct'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateCustomProduct'
+          description: Created. New custom product in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop, or your token is not authorized
+            for write access)
+        '406':
+          description: Business logic problem (more info in response body)
+  /api/my_shop/customproducts/{id}/:
+    get:
+      operationId: my_shop_customproducts_retrieve
+      description: This action retrieves a custom product present in your shop inventory
+      summary: Retrieve a custom product from your inventory
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this MOC/vrac/autre.
+        required: true
+      tags:
+      - Manage your shop inventory
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateCustomProduct'
+          description: Get custom products in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop)
+        '404':
+          description: Not found
+    put:
+      operationId: my_shop_customproducts_update
+      description: This action allows you to update a custom product present in your
+        shop inventory. You must specify all the mandatory fields.
+      summary: Update a custom product in your inventory
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this MOC/vrac/autre.
+        required: true
+      tags:
+      - Manage your shop inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomProduct'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomProduct'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomProduct'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateCustomProduct'
+          description: Updated. New custom product representation in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop, or your token is not authorized
+            for write access)
+        '406':
+          description: Business logic problem (more info in response body)
+    patch:
+      operationId: my_shop_customproducts_partial_update
+      description: This action allows you to update some fields if a custom product
+        present in your shop inventory.
+      summary: Partially update a custom product in your inventory
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this MOC/vrac/autre.
+        required: true
+      tags:
+      - Manage your shop inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateCustomProduct'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateCustomProduct'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateCustomProduct'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateCustomProduct'
+          description: Updated. New custom product representation in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop, or your token is not authorized
+            for write access)
+        '406':
+          description: Business logic problem (more info in response body)
+    delete:
+      operationId: my_shop_customproducts_destroy
+      description: This action allows you to remove a custom product present in your
+        shop inventory.
+      summary: Remove a custom product fom in your inventory
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this MOC/vrac/autre.
+        required: true
+      tags:
+      - Manage your shop inventory
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: Set removed from your inventory
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop, or your token is not authorized
+            for write access)
+        '406':
+          description: Business logic problem (more info in response body)
+  /api/my_shop/customproducts/{product_id}/images:
+    get:
+      operationId: my_shop_customproducts_images_list
+      description: This action allows you to list all images of a custom product
+      summary: List all images of a custom product
+      parameters:
+      - in: path
+        name: product_id
+        schema:
+          type: string
+        description: id of the custom product
+        required: true
+      tags:
+      - Manage your shop inventory
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomProductImage'
+          description: List product images in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop)
+    post:
+      operationId: my_shop_customproducts_images_create
+      description: This action allows you to upload a new image for a custom product
+        in your shop inventory.
+      summary: Upload a new image for a custom product
+      parameters:
+      - in: path
+        name: product_id
+        schema:
+          type: string
+        description: id of the custom product
+        required: true
+      tags:
+      - Manage your shop inventory
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomProductImage'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomProductImage'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomProductImage'
+          description: Created. New image in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop, or your token is not authorized
+            for write access)
+        '406':
+          description: Business logic problem (more info in response body)
+  /api/my_shop/customproducts/{product_id}/images/{id}/:
+    get:
+      operationId: my_shop_customproducts_images_retrieve
+      description: This action retrieves an image of a custom product present in your
+        shop inventory
+      summary: Retrieve an image of a custom product
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: pk
+        schema:
+          type: string
+        description: id of the image to retrieve
+        required: true
+      - in: path
+        name: product_id
+        schema:
+          type: string
+        description: id of the custom product
+        required: true
+      tags:
+      - Manage your shop inventory
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomProductImage'
+          description: Get image in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop)
+        '404':
+          description: Not found
+    put:
+      operationId: my_shop_customproducts_images_update
+      description: This action allows you to update an image of one of your custom
+        product. You can only set the 'is_default' image, specifying if it will be
+        used as default image on different pages of the website. If you set this flag
+        to True, all the other images of the product will have this flag set to False
+      summary: Update an image for a custom product in your inventory
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: product_id
+        schema:
+          type: string
+        description: id of the image to update
+        required: true
+      tags:
+      - Manage your shop inventory
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomProductImage'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomProductImage'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomProductImage'
+          description: Updated. New image representation in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop, or your token is not authorized
+            for write access)
+        '406':
+          description: Business logic problem (more info in response body)
+    delete:
+      operationId: my_shop_customproducts_images_destroy
+      description: This action allows you to remove an image associated to a custom
+        product present in your inventory
+      summary: Remove an image of a custom product
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: product_id
+        schema:
+          type: string
+        description: id of the custom product
+        required: true
+      tags:
+      - Manage your shop inventory
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: Image removed
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop, or your token is not authorized
+            for write access)
+        '406':
+          description: Business logic problem (more info in response body)
+  /api/my_shop/products/:
+    get:
+      operationId: my_shop_products_list
+      description: This action allows you to list all products (sets or other types)
+        in your shop inventory. Main interest of this view is to provide endpoints
+        to update fields that are common to any product types
+      summary: List all products (sets or other types) in your inventory
+      tags:
+      - Manage your shop inventory
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PrivateRentableProduct'
+          description: List  products in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop)
+  /api/my_shop/products/{id}/:
+    get:
+      operationId: my_shop_products_retrieve
+      description: This action allows you to retrieve a product (set or other type)
+        in your shop inventory. Main interest of this view is to provide endpoints
+        to update fields that are common to any product types
+      summary: Retrieve a product from your inventory
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Produit en location.
+        required: true
+      tags:
+      - Manage your shop inventory
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateRentableProduct'
+          description: Get product in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop)
+        '404':
+          description: Not found
+    put:
+      operationId: my_shop_products_update
+      description: This action allows you to update a product present in your shop
+        inventory. You must specify all the mandatory fields.
+      summary: Update a product in your inventory
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Produit en location.
+        required: true
+      tags:
+      - Manage your shop inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrivateRentableProduct'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PrivateRentableProduct'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PrivateRentableProduct'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateRentableProduct'
+          description: Updated. New product representation in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop, or your token is not authorized
+            for write access)
+        '406':
+          description: Business logic problem (more info in response body)
+    patch:
+      operationId: my_shop_products_partial_update
+      description: This action allows you to partially update a product present in
+        your shop inventory.
+      summary: Partially update a product in your inventory
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Produit en location.
+        required: true
+      tags:
+      - Manage your shop inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPrivateRentableProduct'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPrivateRentableProduct'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPrivateRentableProduct'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateRentableProduct'
+          description: Updated. New product representation in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop, or your token is not authorized
+            for write access)
+        '406':
+          description: Business logic problem (more info in response body)
+  /api/my_shop/sets/:
+    get:
+      operationId: my_shop_sets_list
+      description: This action allows you to list all sets in your shop inventory.
+      summary: List all sets in your inventory
+      tags:
+      - Manage your shop inventory
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PrivateRentableSet'
+          description: List sets in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop)
+    post:
+      operationId: my_shop_sets_create
+      description: 'This action allows you to add a new set in your shop inventory.
+        You specify the set to add by using it''s LEGO id (for example ''10333-1''
+        for ''The Lord of the Rings: Barad-dûr''), and all your rental-related settings.
+        This action supposes, for now, that the sets has already been registered in
+        our database.'
+      summary: Register a new set in your inventory
+      tags:
+      - Manage your shop inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRentableSet'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateRentableSet'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateRentableSet'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateRentableSet'
+          description: Created. New set in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop, or your token is not authorized
+            for write access)
+        '406':
+          description: Business logic problem (more info in response body)
+  /api/my_shop/sets/{id}/:
+    get:
+      operationId: my_shop_sets_retrieve
+      description: This action retrieves a set present in your shop inventory
+      summary: Retrieve a set from your inventory
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Set en location.
+        required: true
+      tags:
+      - Manage your shop inventory
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateRentableSet'
+          description: Get sets in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop)
+        '404':
+          description: Not found
+    put:
+      operationId: my_shop_sets_update
+      description: This action allows you to update a set present in your shop inventory.
+        You must specify all the mandatory fields.
+      summary: Update a set in your inventory
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Set en location.
+        required: true
+      tags:
+      - Manage your shop inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRentableSet'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdateRentableSet'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UpdateRentableSet'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateRentableSet'
+          description: Updated. New set representation in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop, or your token is not authorized
+            for write access)
+        '406':
+          description: Business logic problem (more info in response body)
+    patch:
+      operationId: my_shop_sets_partial_update
+      description: This action allows you to update some fields if a set present in
+        your shop inventory.
+      summary: Partially update a set in your inventory
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Set en location.
+        required: true
+      tags:
+      - Manage your shop inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateRentableSet'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateRentableSet'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateRentableSet'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateRentableSet'
+          description: Updated. New set representation in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop, or your token is not authorized
+            for write access)
+        '406':
+          description: Business logic problem (more info in response body)
+    delete:
+      operationId: my_shop_sets_destroy
+      description: This action allows you to remove a set present in your shop inventory.
+      summary: Remove a set fom in your inventory
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Set en location.
+        required: true
+      tags:
+      - Manage your shop inventory
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: Set removed from your inventory
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '403':
+          description: Forbidden (you don't have a shop, or your token is not authorized
+            for write access)
+        '406':
+          description: Business logic problem (more info in response body)
+  /api/rebrickable/sets/:
+    get:
+      operationId: rebrickable_sets_list
+      description: This action allows you to search for sets in Rebrickable database.
+      summary: Search set in rebrickable database
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Limit results to set whose name, number or release year match
+          this param
+      tags:
+      - Explore our local copy of https://rebrickable.com/ database
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRebrickableSetList'
+          description: List sets in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+  /api/shops/:
+    get:
+      operationId: shops_list
+      description: This action allows you to list all shops registered on LocaBriques
+      summary: List all shops registered on LocaBriques
+      parameters:
+      - in: query
+        name: open_only
+        schema:
+          type: boolean
+          default: false
+        description: Limit results to shop currently open (set to 'true' to enable)
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - Explore shops from our owners
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPublicShopList'
+          description: List shops in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+  /api/shops/{slug}/:
+    get:
+      operationId: shops_retrieve
+      description: This action retrieves a shop registered on LocaBriques
+      summary: Retrieve a shop registered on LocaBriques
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        description: Slug of the shop to retrieve
+        required: true
+      tags:
+      - Explore shops from our owners
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicShop'
+          description: Get shop in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '404':
+          description: Not found
+  /api/shops/{slug}/customproducts/:
+    get:
+      operationId: shops_customproducts_list
+      description: This action allows you to list all custom products rented by a
+        shop
+      summary: List all custom products (bulk, MOCs, and other types) rented in a
+        shop
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        description: Slug of the shop to look up
+        required: true
+      tags:
+      - Explore shops from our owners
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicCustomProduct'
+          description: List shop custom products in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+  /api/shops/{slug}/customproducts/{id}/:
+    get:
+      operationId: shops_customproducts_retrieve
+      description: This action retrieves a custom product rented in a shop
+      summary: Retrieve a custom product rented in a shop
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: id of the custom product to retrieve
+        required: true
+      - in: path
+        name: slug
+        schema:
+          type: string
+        description: Slug of the shop to look up
+        required: true
+      tags:
+      - Explore shops from our owners
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicCustomProduct'
+          description: Get shop custom product in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '404':
+          description: Not found
+  /api/shops/{slug}/sets/:
+    get:
+      operationId: shops_sets_list
+      description: This action allows you to list all sets rented by a shop
+      summary: List all sets rented in a shop
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        description: Slug of the shop to look up
+        required: true
+      tags:
+      - Explore shops from our owners
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicRentableSet'
+          description: List shop sets in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+  /api/shops/{slug}/sets/{id}/:
+    get:
+      operationId: shops_sets_retrieve
+      description: This action retrieves a set rented in a shop
+      summary: Retrieve a set rented in a shop
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: id of the set to retrieve
+        required: true
+      - in: path
+        name: slug
+        schema:
+          type: string
+        description: Slug of the shop to look up
+        required: true
+      tags:
+      - Explore shops from our owners
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicRentableSet'
+          description: Get shop set in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '404':
+          description: Not found
+  /api/themes/:
+    get:
+      operationId: themes_list
+      description: This action allows you to search themes in our entire LEGO® sets
+        database.
+      summary: Search themes in our LEGO® sets database
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Search theme by slug. Only themes matching the whole string will
+          be returned. This detabase only contains themes from sets  that have been
+          previously integrated by a user.
+      tags:
+      - Explore our LEGO® themes database
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLegoThemeList'
+          description: List sets in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+  /api/themes/{id}/:
+    get:
+      operationId: themes_retrieve
+      description: This action retrieves a LEGO® theme present in our database
+      summary: Retrieve a LEGO® theme from our database
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this theme.
+        required: true
+      tags:
+      - Explore our LEGO® themes database
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegoTheme'
+          description: Get theme in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '404':
+          description: Not found
+  /api/users/:
+    get:
+      operationId: users_list
+      description: This action allows you to list all users registered on LocaBriques
+        whose username matches 'searched_string'
+      summary: List all users registered on LocaBriques whose username matches 'searched_string'
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: searched_string
+        schema:
+          type: string
+          minLength: 3
+        description: part of username to look for. At least 3 chars.
+        required: true
+      tags:
+      - List our user's usernames
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPublicUserList'
+          description: List users in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+components:
+  schemas:
+    BackInStockAlert:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        legoset:
+          $ref: '#/components/schemas/SimpleLegoSet'
+        legoset_name:
+          type: string
+          nullable: true
+          maxLength: 128
+        registration_date:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date d'enregistrement
+      required:
+      - id
+      - legoset
+      - registration_date
+    BagInventory:
+      type: object
+      properties:
+        url:
+          type: string
+          readOnly: true
+          description: URL of the object
+        bag_number:
+          type: string
+          maxLength: 32
+        bag_number_slug:
+          type: string
+          nullable: true
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        content:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+          description: 'Content of bag. This field is a dict where keys are Rebrickable
+            colors ID of each color present in tha bag, andvalue is a dict where keys
+            are Rebrickable part reference and value are the number of this part.
+            For instance{''71'': {''3622'': 2}} represents 2 1x3 bricks in light bluish
+            grey'
+      required:
+      - bag_number
+      - content
+      - url
+    BagInventoryUpdateResponse:
+      type: object
+      properties:
+        delta:
+          type: integer
+          description: Difference between new value and old value
+      required:
+      - delta
+    BlankEnum:
+      enum:
+      - ''
+    BricksetSearchResult:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Set identifier in brickset database
+        lego_id:
+          type: string
+          description: LEGO® identifier of the set
+          pattern: '[0-9]{3,}-[0-9]'
+        name:
+          type: string
+          description: Name of the set
+        release_year:
+          type: string
+          description: Release year of the set
+        images:
+          type: array
+          items:
+            type: string
+          description: List of set images
+      required:
+      - id
+      - images
+      - lego_id
+      - name
+      - release_year
+    BricksetSetParam:
+      type: object
+      properties:
+        brickset_set_id:
+          type: integer
+          description: Set identifier in brickset database
+      required:
+      - brickset_set_id
+    CatalogCustomProduct:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        product_name:
+          type: string
+          readOnly: true
+        rental_price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Price / 1 month (€)
+        rental_price_without_delivery:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+          description: Price / 1 month (€) if hand delivered
+        deposit:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Deposit amount (€)
+        is_available:
+          type: boolean
+          description: Set available for rental?
+        comment:
+          type: string
+          description: Comment on product condition
+        product_weight:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Weight (grams)
+          description: Weight (grams)
+        website_url:
+          type: string
+          readOnly: true
+        image_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomProductImage'
+        default_image:
+          allOf:
+          - $ref: '#/components/schemas/CustomProductImage'
+          description: Image by default of the product
+        type_label:
+          type: string
+          readOnly: true
+        slug:
+          type: string
+          description: slug representing product name
+          maxLength: 128
+          pattern: ^[-a-zA-Z0-9_]+$
+        content_description:
+          type: string
+          title: Description
+          description: product description
+        product_type:
+          $ref: '#/components/schemas/ProductTypeEnum'
+        average_rate:
+          type: number
+          format: double
+          readOnly: true
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+          readOnly: true
+          description: Reviews left by clients
+        url:
+          type: string
+          readOnly: true
+        availability:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductAvailability'
+          readOnly: true
+      required:
+      - availability
+      - average_rate
+      - content_description
+      - default_image
+      - id
+      - image_list
+      - product_name
+      - product_type
+      - product_weight
+      - rental_price
+      - reviews
+      - slug
+      - type_label
+      - url
+      - website_url
+    CatalogLMBLightKit:
+      type: object
+      properties:
+        url:
+          type: string
+          readOnly: true
+        product_name:
+          type: string
+          readOnly: true
+        slug:
+          type: string
+          description: Slug representing kit name
+          pattern: ^[-a-zA-Z0-9_]+$
+        default_image:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          description: Official description of the light kit. Property of the LightMyBricks
+            company.
+        rental_price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Price / 1 month (€)
+        deposit:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Deposit amount (€)
+        average_rate:
+          type: number
+          format: double
+          readOnly: true
+        original_url:
+          type: string
+          format: uri
+          description: Original URL of the product on lightmybricks.com
+        legoset:
+          allOf:
+          - $ref: '#/components/schemas/SimpleLegoSet'
+          description: The set this kit is adapted to.
+        website_url:
+          type: string
+          readOnly: true
+        image_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomProductImage'
+        availability:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductAvailability'
+          readOnly: true
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+          readOnly: true
+          description: Reviews left by clients
+      required:
+      - availability
+      - average_rate
+      - default_image
+      - description
+      - image_list
+      - legoset
+      - original_url
+      - product_name
+      - rental_price
+      - reviews
+      - slug
+      - url
+      - website_url
+    CatalogLegoSet:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        url:
+          type: string
+          readOnly: true
+        public_url:
+          type: string
+          readOnly: true
+          description: URL of the set on the website
+        name:
+          type: string
+          readOnly: true
+          description: Name of the set, in your language
+        detailed_name:
+          type: string
+          readOnly: true
+          description: Name and LEGO® identifier of the set
+        themes:
+          type: array
+          items:
+            $ref: '#/components/schemas/SimpleLegoTheme'
+        weight:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Weight (grams)
+        lego_id:
+          type: string
+          description: LEGO® set identifier
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        default_image:
+          $ref: '#/components/schemas/LegoSetImage'
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/LegoSetImage'
+        part_count:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Parts count
+        minifig_count:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Minifig count
+        selling_price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Estimated retail price
+        ages:
+          type: string
+          nullable: true
+          description: Age category
+          maxLength: 32
+        height:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Height
+        width:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Width
+        depth:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Depth
+        release_year:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+          description: Market release year
+        headline:
+          type: string
+          readOnly: true
+          description: Headline
+        description:
+          type: string
+          readOnly: true
+          description: Product description. Property of the LEGO group.
+        average_rate:
+          type: number
+          format: double
+          readOnly: true
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/LegoSetReview'
+          readOnly: true
+          description: Reviews left by clients
+        availability:
+          type: array
+          items:
+            $ref: '#/components/schemas/SetAvailability'
+          readOnly: true
+        website_url:
+          type: string
+          readOnly: true
+        min_rental_price:
+          type: integer
+          readOnly: true
+        max_rental_price:
+          type: integer
+          readOnly: true
+        in_user_wishlist:
+          type: boolean
+          readOnly: true
+      required:
+      - availability
+      - average_rate
+      - default_image
+      - description
+      - detailed_name
+      - headline
+      - id
+      - images
+      - in_user_wishlist
+      - lego_id
+      - max_rental_price
+      - min_rental_price
+      - name
+      - public_url
+      - reviews
+      - themes
+      - url
+      - website_url
+    Country:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Localized country name
+        code:
+          type: string
+          description: ISO 3166-1 alpha-2 country code
+        alpha3:
+          type: string
+          description: ISO 3166-1 alpha-3 country code
+      required:
+      - alpha3
+      - code
+      - name
+    CountryEnum:
+      enum:
+      - AF
+      - AX
+      - AL
+      - DZ
+      - AS
+      - AD
+      - AO
+      - AI
+      - AQ
+      - AG
+      - AR
+      - AM
+      - AW
+      - AU
+      - AT
+      - AZ
+      - BS
+      - BH
+      - BD
+      - BB
+      - BY
+      - BE
+      - BZ
+      - BJ
+      - BM
+      - BT
+      - BO
+      - BQ
+      - BA
+      - BW
+      - BV
+      - BR
+      - IO
+      - BN
+      - BG
+      - BF
+      - BI
+      - CV
+      - KH
+      - CM
+      - CA
+      - KY
+      - CF
+      - TD
+      - CL
+      - CN
+      - CX
+      - CC
+      - CO
+      - KM
+      - CG
+      - CD
+      - CK
+      - CR
+      - CI
+      - HR
+      - CU
+      - CW
+      - CY
+      - CZ
+      - DK
+      - DJ
+      - DM
+      - DO
+      - EC
+      - EG
+      - SV
+      - GQ
+      - ER
+      - EE
+      - SZ
+      - ET
+      - FK
+      - FO
+      - FJ
+      - FI
+      - FR
+      - GF
+      - PF
+      - TF
+      - GA
+      - GM
+      - GE
+      - DE
+      - GH
+      - GI
+      - GR
+      - GL
+      - GD
+      - GP
+      - GU
+      - GT
+      - GG
+      - GN
+      - GW
+      - GY
+      - HT
+      - HM
+      - VA
+      - HN
+      - HK
+      - HU
+      - IS
+      - IN
+      - ID
+      - IR
+      - IQ
+      - IE
+      - IM
+      - IL
+      - IT
+      - JM
+      - JP
+      - JE
+      - JO
+      - KZ
+      - KE
+      - KI
+      - KW
+      - KG
+      - LA
+      - LV
+      - LB
+      - LS
+      - LR
+      - LY
+      - LI
+      - LT
+      - LU
+      - MO
+      - MG
+      - MW
+      - MY
+      - MV
+      - ML
+      - MT
+      - MH
+      - MQ
+      - MR
+      - MU
+      - YT
+      - MX
+      - FM
+      - MD
+      - MC
+      - MN
+      - ME
+      - MS
+      - MA
+      - MZ
+      - MM
+      - NA
+      - NR
+      - NP
+      - NL
+      - NC
+      - NZ
+      - NI
+      - NE
+      - NG
+      - NU
+      - NF
+      - KP
+      - MK
+      - MP
+      - 'NO'
+      - OM
+      - PK
+      - PW
+      - PS
+      - PA
+      - PG
+      - PY
+      - PE
+      - PH
+      - PN
+      - PL
+      - PT
+      - PR
+      - QA
+      - RE
+      - RO
+      - RU
+      - RW
+      - BL
+      - SH
+      - KN
+      - LC
+      - MF
+      - PM
+      - VC
+      - WS
+      - SM
+      - ST
+      - SA
+      - SN
+      - RS
+      - SC
+      - SL
+      - SG
+      - SX
+      - SK
+      - SI
+      - SB
+      - SO
+      - ZA
+      - GS
+      - KR
+      - SS
+      - ES
+      - LK
+      - SD
+      - SR
+      - SJ
+      - SE
+      - CH
+      - SY
+      - TW
+      - TJ
+      - TZ
+      - TH
+      - TL
+      - TG
+      - TK
+      - TO
+      - TT
+      - TN
+      - TR
+      - TM
+      - TC
+      - TV
+      - UG
+      - UA
+      - AE
+      - GB
+      - UM
+      - US
+      - UY
+      - UZ
+      - VU
+      - VE
+      - VN
+      - VG
+      - VI
+      - WF
+      - EH
+      - YE
+      - ZM
+      - ZW
+      type: string
+      description: |-
+        * `AF` - Afghanistan
+        * `AX` - Åland Islands
+        * `AL` - Albania
+        * `DZ` - Algeria
+        * `AS` - American Samoa
+        * `AD` - Andorra
+        * `AO` - Angola
+        * `AI` - Anguilla
+        * `AQ` - Antarctica
+        * `AG` - Antigua and Barbuda
+        * `AR` - Argentina
+        * `AM` - Armenia
+        * `AW` - Aruba
+        * `AU` - Australia
+        * `AT` - Austria
+        * `AZ` - Azerbaijan
+        * `BS` - Bahamas
+        * `BH` - Bahrain
+        * `BD` - Bangladesh
+        * `BB` - Barbados
+        * `BY` - Belarus
+        * `BE` - Belgium
+        * `BZ` - Belize
+        * `BJ` - Benin
+        * `BM` - Bermuda
+        * `BT` - Bhutan
+        * `BO` - Bolivia
+        * `BQ` - Bonaire, Sint Eustatius and Saba
+        * `BA` - Bosnia and Herzegovina
+        * `BW` - Botswana
+        * `BV` - Bouvet Island
+        * `BR` - Brazil
+        * `IO` - British Indian Ocean Territory
+        * `BN` - Brunei
+        * `BG` - Bulgaria
+        * `BF` - Burkina Faso
+        * `BI` - Burundi
+        * `CV` - Cabo Verde
+        * `KH` - Cambodia
+        * `CM` - Cameroon
+        * `CA` - Canada
+        * `KY` - Cayman Islands
+        * `CF` - Central African Republic
+        * `TD` - Chad
+        * `CL` - Chile
+        * `CN` - China
+        * `CX` - Christmas Island
+        * `CC` - Cocos (Keeling) Islands
+        * `CO` - Colombia
+        * `KM` - Comoros
+        * `CG` - Congo
+        * `CD` - Congo (the Democratic Republic of the)
+        * `CK` - Cook Islands
+        * `CR` - Costa Rica
+        * `CI` - Côte d'Ivoire
+        * `HR` - Croatia
+        * `CU` - Cuba
+        * `CW` - Curaçao
+        * `CY` - Cyprus
+        * `CZ` - Czechia
+        * `DK` - Denmark
+        * `DJ` - Djibouti
+        * `DM` - Dominica
+        * `DO` - Dominican Republic
+        * `EC` - Ecuador
+        * `EG` - Egypt
+        * `SV` - El Salvador
+        * `GQ` - Equatorial Guinea
+        * `ER` - Eritrea
+        * `EE` - Estonia
+        * `SZ` - Eswatini
+        * `ET` - Ethiopia
+        * `FK` - Falkland Islands (Malvinas)
+        * `FO` - Faroe Islands
+        * `FJ` - Fiji
+        * `FI` - Finland
+        * `FR` - France
+        * `GF` - French Guiana
+        * `PF` - French Polynesia
+        * `TF` - French Southern Territories
+        * `GA` - Gabon
+        * `GM` - Gambia
+        * `GE` - Georgia
+        * `DE` - Germany
+        * `GH` - Ghana
+        * `GI` - Gibraltar
+        * `GR` - Greece
+        * `GL` - Greenland
+        * `GD` - Grenada
+        * `GP` - Guadeloupe
+        * `GU` - Guam
+        * `GT` - Guatemala
+        * `GG` - Guernsey
+        * `GN` - Guinea
+        * `GW` - Guinea-Bissau
+        * `GY` - Guyana
+        * `HT` - Haiti
+        * `HM` - Heard Island and McDonald Islands
+        * `VA` - Holy See
+        * `HN` - Honduras
+        * `HK` - Hong Kong
+        * `HU` - Hungary
+        * `IS` - Iceland
+        * `IN` - India
+        * `ID` - Indonesia
+        * `IR` - Iran
+        * `IQ` - Iraq
+        * `IE` - Ireland
+        * `IM` - Isle of Man
+        * `IL` - Israel
+        * `IT` - Italy
+        * `JM` - Jamaica
+        * `JP` - Japan
+        * `JE` - Jersey
+        * `JO` - Jordan
+        * `KZ` - Kazakhstan
+        * `KE` - Kenya
+        * `KI` - Kiribati
+        * `KW` - Kuwait
+        * `KG` - Kyrgyzstan
+        * `LA` - Laos
+        * `LV` - Latvia
+        * `LB` - Lebanon
+        * `LS` - Lesotho
+        * `LR` - Liberia
+        * `LY` - Libya
+        * `LI` - Liechtenstein
+        * `LT` - Lithuania
+        * `LU` - Luxembourg
+        * `MO` - Macao
+        * `MG` - Madagascar
+        * `MW` - Malawi
+        * `MY` - Malaysia
+        * `MV` - Maldives
+        * `ML` - Mali
+        * `MT` - Malta
+        * `MH` - Marshall Islands
+        * `MQ` - Martinique
+        * `MR` - Mauritania
+        * `MU` - Mauritius
+        * `YT` - Mayotte
+        * `MX` - Mexico
+        * `FM` - Micronesia (Federated States of)
+        * `MD` - Moldova
+        * `MC` - Monaco
+        * `MN` - Mongolia
+        * `ME` - Montenegro
+        * `MS` - Montserrat
+        * `MA` - Morocco
+        * `MZ` - Mozambique
+        * `MM` - Myanmar
+        * `NA` - Namibia
+        * `NR` - Nauru
+        * `NP` - Nepal
+        * `NL` - Netherlands
+        * `NC` - New Caledonia
+        * `NZ` - New Zealand
+        * `NI` - Nicaragua
+        * `NE` - Niger
+        * `NG` - Nigeria
+        * `NU` - Niue
+        * `NF` - Norfolk Island
+        * `KP` - North Korea
+        * `MK` - North Macedonia
+        * `MP` - Northern Mariana Islands
+        * `NO` - Norway
+        * `OM` - Oman
+        * `PK` - Pakistan
+        * `PW` - Palau
+        * `PS` - Palestine, State of
+        * `PA` - Panama
+        * `PG` - Papua New Guinea
+        * `PY` - Paraguay
+        * `PE` - Peru
+        * `PH` - Philippines
+        * `PN` - Pitcairn
+        * `PL` - Poland
+        * `PT` - Portugal
+        * `PR` - Puerto Rico
+        * `QA` - Qatar
+        * `RE` - Réunion
+        * `RO` - Romania
+        * `RU` - Russia
+        * `RW` - Rwanda
+        * `BL` - Saint Barthélemy
+        * `SH` - Saint Helena, Ascension and Tristan da Cunha
+        * `KN` - Saint Kitts and Nevis
+        * `LC` - Saint Lucia
+        * `MF` - Saint Martin (French part)
+        * `PM` - Saint Pierre and Miquelon
+        * `VC` - Saint Vincent and the Grenadines
+        * `WS` - Samoa
+        * `SM` - San Marino
+        * `ST` - Sao Tome and Principe
+        * `SA` - Saudi Arabia
+        * `SN` - Senegal
+        * `RS` - Serbia
+        * `SC` - Seychelles
+        * `SL` - Sierra Leone
+        * `SG` - Singapore
+        * `SX` - Sint Maarten (Dutch part)
+        * `SK` - Slovakia
+        * `SI` - Slovenia
+        * `SB` - Solomon Islands
+        * `SO` - Somalia
+        * `ZA` - South Africa
+        * `GS` - South Georgia and the South Sandwich Islands
+        * `KR` - South Korea
+        * `SS` - South Sudan
+        * `ES` - Spain
+        * `LK` - Sri Lanka
+        * `SD` - Sudan
+        * `SR` - Suriname
+        * `SJ` - Svalbard and Jan Mayen
+        * `SE` - Sweden
+        * `CH` - Switzerland
+        * `SY` - Syria
+        * `TW` - Taiwan
+        * `TJ` - Tajikistan
+        * `TZ` - Tanzania
+        * `TH` - Thailand
+        * `TL` - Timor-Leste
+        * `TG` - Togo
+        * `TK` - Tokelau
+        * `TO` - Tonga
+        * `TT` - Trinidad and Tobago
+        * `TN` - Tunisia
+        * `TR` - Türkiye
+        * `TM` - Turkmenistan
+        * `TC` - Turks and Caicos Islands
+        * `TV` - Tuvalu
+        * `UG` - Uganda
+        * `UA` - Ukraine
+        * `AE` - United Arab Emirates
+        * `GB` - United Kingdom
+        * `UM` - United States Minor Outlying Islands
+        * `US` - United States of America
+        * `UY` - Uruguay
+        * `UZ` - Uzbekistan
+        * `VU` - Vanuatu
+        * `VE` - Venezuela
+        * `VN` - Vietnam
+        * `VG` - Virgin Islands (British)
+        * `VI` - Virgin Islands (U.S.)
+        * `WF` - Wallis and Futuna
+        * `EH` - Western Sahara
+        * `YE` - Yemen
+        * `ZM` - Zambia
+        * `ZW` - Zimbabwe
+    CreateBagInventory:
+      type: object
+      properties:
+        bag_number:
+          type: string
+          maxLength: 32
+      required:
+      - bag_number
+    CreateCustomProduct:
+      type: object
+      properties:
+        product_name:
+          type: string
+        content_description:
+          type: string
+          title: Description
+          description: product description
+        rental_price:
+          type: integer
+          minimum: 0
+          description: Price / 1 month (€)
+        rental_price_without_delivery:
+          type: integer
+          minimum: 0
+          description: Price / 1 month (€) if hand delivered
+        deposit:
+          type: integer
+          minimum: 0
+          description: Deposit amount (€)
+        is_available:
+          type: boolean
+          description: Set available for rental?
+        comment:
+          type: string
+          default: ''
+          description: Comment on product condition
+        private_comment:
+          type: string
+          default: ''
+          description: Private comment about product (visible only to product owner)
+        product_weight:
+          type: integer
+          minimum: 0
+          description: Weight (grams)
+      required:
+      - content_description
+      - deposit
+      - is_available
+      - product_name
+      - product_weight
+      - rental_price
+    CreateRentableSet:
+      type: object
+      properties:
+        legoset_lego_id:
+          type: string
+          description: LEGO® identifier of the set to add
+          pattern: '[0-9]{3,}-[0-9]'
+        rental_price:
+          type: integer
+          minimum: 0
+          description: Price / 1 month (€)
+        rental_price_without_delivery:
+          type: integer
+          minimum: 0
+          description: Price / 1 month (€) if hand delivered
+        deposit:
+          type: integer
+          minimum: 0
+          description: Deposit amount (€)
+        auto_update_deposit:
+          type: boolean
+          description: Automatic deposit update
+        is_available:
+          type: boolean
+          description: Set available for rental?
+        sorting_type:
+          $ref: '#/components/schemas/SortingTypeEnum'
+        comment:
+          type: string
+          default: ''
+          description: Comment on product condition
+        private_comment:
+          type: string
+          default: ''
+          description: Private comment about product (visible only to product owner)
+        product_weight:
+          type: integer
+          minimum: 0
+          description: Weight (grams)
+        bulk_return_fee:
+          type: number
+          format: double
+          minimum: 0
+          description: Bulk return fees (€)
+      required:
+      - auto_update_deposit
+      - deposit
+      - is_available
+      - legoset_lego_id
+      - product_weight
+      - rental_price
+    CreateSetInventory:
+      type: object
+      properties:
+        set_num:
+          type: string
+          description: LEGO® identifier of the set to add
+          pattern: '[0-9]{3,}-[0-9]'
+      required:
+      - set_num
+    CreateWishListItem:
+      type: object
+      properties:
+        legoset_lego_id:
+          type: string
+          description: LEGO® identifier of the set to add
+          pattern: '[0-9]{3,}-[0-9]'
+      required:
+      - legoset_lego_id
+    CustomProductImage:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        size:
+          type: integer
+          readOnly: true
+        path:
+          type: string
+          readOnly: true
+        is_default:
+          type: boolean
+        thumbnail_url:
+          type: string
+          readOnly: true
+      required:
+      - id
+      - name
+      - path
+      - size
+      - thumbnail_url
+    DiscountTypeEnum:
+      enum:
+      - percent
+      - amount
+      - week
+      - month
+      type: string
+      description: |-
+        * `percent` - %
+        * `amount` - €
+        * `week` - week(s)
+        * `month` - month(s)
+    InventoryAuthor:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        shop_name:
+          type: string
+          readOnly: true
+          description: Name of author's shop if any
+        shop_url:
+          type: string
+          readOnly: true
+          description: URL of author's shop if any
+        user_page:
+          type: string
+          readOnly: true
+          description: Author's page if exists
+      required:
+      - id
+      - shop_name
+      - shop_url
+      - user_page
+      - username
+    LanguageCodeEnum:
+      enum:
+      - en
+      - fr
+      type: string
+      description: |-
+        * `en` - English
+        * `fr` - Français
+    LegoSet:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        public_url:
+          type: string
+          readOnly: true
+          description: URL of the set on the website
+        name:
+          type: string
+          readOnly: true
+          description: Name of the set, in your language
+        detailed_name:
+          type: string
+          readOnly: true
+          description: Name and LEGO® identifier of the set
+        themes:
+          type: array
+          items:
+            $ref: '#/components/schemas/SimpleLegoTheme'
+        weight:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Weight (grams)
+        lego_id:
+          type: string
+          description: LEGO® set identifier
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        default_image:
+          $ref: '#/components/schemas/LegoSetImage'
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/LegoSetImage'
+        part_count:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Parts count
+        minifig_count:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Minifig count
+        selling_price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Estimated retail price
+        ages:
+          type: string
+          nullable: true
+          description: Age category
+          maxLength: 32
+        height:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Height
+        width:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Width
+        depth:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Depth
+        release_year:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+          description: Market release year
+        headline:
+          type: string
+          readOnly: true
+          description: Headline
+        description:
+          type: string
+          readOnly: true
+          description: Product description. Property of the LEGO group.
+        average_rate:
+          type: number
+          format: double
+          readOnly: true
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/LegoSetReview'
+          readOnly: true
+          description: Reviews left by clients
+      required:
+      - average_rate
+      - default_image
+      - description
+      - detailed_name
+      - headline
+      - id
+      - images
+      - lego_id
+      - name
+      - public_url
+      - reviews
+      - themes
+      - url
+    LegoSetImage:
+      type: object
+      properties:
+        image_file:
+          type: string
+          format: uri
+          description: path to image
+        thumbnail_url:
+          type: string
+          readOnly: true
+          description: path to image thumbnail
+      required:
+      - image_file
+      - thumbnail_url
+    LegoSetReview:
+      type: object
+      properties:
+        publication_date:
+          type: string
+          format: date-time
+          readOnly: true
+        comment:
+          type: string
+        rate:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          title: Note
+        author:
+          type: string
+          readOnly: true
+      required:
+      - author
+      - publication_date
+      - rate
+    LegoTheme:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slug:
+          type: string
+          description: Slug string representing theme name and parent theme name
+          maxLength: 128
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          description: Name of the theme
+          maxLength: 128
+        full_name:
+          type: string
+          readOnly: true
+          description: string representing theme name and parent name
+        parent_theme_id:
+          type: integer
+          readOnly: true
+          description: id of parent theme if exists, else None
+      required:
+      - full_name
+      - id
+      - name
+      - parent_theme_id
+      - slug
+    MinimalRentalDurationEnum:
+      enum:
+      - 1W
+      - 2W
+      - 3W
+      - 1M
+      - 2M
+      - 3M
+      - 4M
+      - 5M
+      - 6M
+      type: string
+      description: |-
+        * `1W` - 1 week
+        * `2W` - 2 weeks
+        * `3W` - 3 weeks
+        * `1M` - 1 month
+        * `2M` - 2 months
+        * `3M` - 3 months
+        * `4M` - 4 months
+        * `5M` - 5 months
+        * `6M` - 6 months
+    MySetInventory:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        url:
+          type: string
+          readOnly: true
+          description: URL of the object
+        set:
+          allOf:
+          - $ref: '#/components/schemas/RebrickableSet'
+          readOnly: true
+        total_part_count:
+          type: integer
+          readOnly: true
+        bag_count:
+          type: integer
+          readOnly: true
+          description: number of bags composing the set inventory
+        updated_on:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - bag_count
+      - id
+      - set
+      - total_part_count
+      - updated_on
+      - url
+    MySetInventoryWithBags:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        set:
+          allOf:
+          - $ref: '#/components/schemas/RebrickableSet'
+          readOnly: true
+        total_part_count:
+          type: integer
+          readOnly: true
+        bag_count:
+          type: integer
+          readOnly: true
+          description: number of bags composing the set inventory
+        author:
+          $ref: '#/components/schemas/InventoryAuthor'
+        author_username:
+          type: string
+        website_url:
+          type: string
+          readOnly: true
+          description: URL of inventory page on website
+        bag_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/BagInventory'
+      required:
+      - author
+      - author_username
+      - bag_count
+      - bag_list
+      - set
+      - total_part_count
+      - url
+      - website_url
+    NullEnum:
+      enum:
+      - null
+    PaginatedBricksetSearchResultList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BricksetSearchResult'
+    PaginatedCatalogCustomProductList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogCustomProduct'
+    PaginatedCatalogLMBLightKitList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogLMBLightKit'
+    PaginatedCatalogLegoSetList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogLegoSet'
+    PaginatedLegoSetList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/LegoSet'
+    PaginatedLegoThemeList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/LegoTheme'
+    PaginatedMySetInventoryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MySetInventory'
+    PaginatedPublicShopList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicShop'
+    PaginatedPublicUserList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicUser'
+    PaginatedRebrickableSetList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/RebrickableSet'
+    PaginatedSetInventoryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SetInventory'
+    ParcelShop:
+      type: object
+      properties:
+        num:
+          type: string
+          maxLength: 16
+        addr1:
+          type: string
+          maxLength: 64
+        addr2:
+          type: string
+          maxLength: 64
+        addr3:
+          type: string
+          maxLength: 64
+        addr4:
+          type: string
+          maxLength: 64
+        postal_code:
+          type: string
+          maxLength: 16
+        city:
+          type: string
+          maxLength: 64
+        country:
+          type: string
+          maxLength: 10
+        localisation1:
+          type: string
+          maxLength: 64
+        localisation2:
+          type: string
+          maxLength: 64
+      required:
+      - addr1
+      - city
+      - country
+      - num
+      - postal_code
+    PatchedPrivateCoupon:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        url:
+          type: string
+          readOnly: true
+        code:
+          type: string
+          maxLength: 16
+          minLength: 6
+        discount_value:
+          type: integer
+          maximum: 2147483647
+          minimum: 1
+        discount_type:
+          $ref: '#/components/schemas/DiscountTypeEnum'
+        usage_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        max_usage_count:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        validity_end:
+          type: string
+          format: date
+          nullable: true
+        restrict_to_product:
+          type: integer
+          nullable: true
+        minimal_rental_duration:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/MinimalRentalDurationEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        comment:
+          type: string
+        is_visible:
+          type: boolean
+          description: Publicly visible coupon?
+    PatchedPrivateRentableProduct:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        url:
+          type: string
+          readOnly: true
+        product_name:
+          type: string
+          readOnly: true
+        integration_date:
+          type: string
+          format: date
+          readOnly: true
+          description: Date when the set was added to your inventory
+        rental_price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Price / 1 month (€)
+        rental_price_without_delivery:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Price / 1 month (€) if hand delivered
+        deposit:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Deposit amount (€)
+        is_available:
+          type: boolean
+          description: Set available for rental?
+        comment:
+          type: string
+          description: Comment on product condition
+        private_comment:
+          type: string
+          description: Private comment about product (only visible to product owner)
+        product_weight:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Weight (grams)
+          description: Weight (grams)
+    PatchedUpdateBagInventory:
+      type: object
+      properties:
+        part_num:
+          type: string
+          description: Rebrickable part reference
+          pattern: ^[-a-zA-Z0-9_]+$
+        color_id:
+          type: string
+          description: Rebrickable color reference
+          pattern: ^[-a-zA-Z0-9_]+$
+        quantity_used:
+          type: integer
+          description: Quantity of part (part_num+color) present in the bag
+    PatchedUpdateCustomProduct:
+      type: object
+      properties:
+        product_name:
+          type: string
+        product_type:
+          $ref: '#/components/schemas/ProductTypeEnum'
+        content_description:
+          type: string
+          title: Description
+          description: product description
+        rental_price:
+          type: integer
+          minimum: 0
+          description: Price / 1 month (€)
+        rental_price_without_delivery:
+          type: integer
+          minimum: 0
+          description: Price / 1 month (€) if hand delivered
+        deposit:
+          type: integer
+          minimum: 0
+          description: Deposit amount (€)
+        is_available:
+          type: boolean
+          description: Set available for rental?
+        comment:
+          type: string
+          default: ''
+          description: Comment on product condition
+        private_comment:
+          type: string
+          default: ''
+          description: Private comment about product (visible only to product owner)
+        product_weight:
+          type: integer
+          minimum: 0
+          description: Weight (grams)
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomProductImage'
+    PatchedUpdateRentableSet:
+      type: object
+      properties:
+        rental_price:
+          type: integer
+          minimum: 0
+          description: Price / 1 month (€)
+        rental_price_without_delivery:
+          type: integer
+          minimum: 0
+          description: Price / 1 month (€) if hand delivered
+        deposit:
+          type: integer
+          minimum: 0
+          description: Deposit amount (€)
+        auto_update_deposit:
+          type: boolean
+          description: Automatic deposit update
+        is_available:
+          type: boolean
+          description: Set available for rental?
+        sorting_type:
+          $ref: '#/components/schemas/SortingTypeEnum'
+        comment:
+          type: string
+          default: ''
+          description: Comment on product condition
+        private_comment:
+          type: string
+          default: ''
+          description: Private comment about product (visible only to product owner)
+        product_weight:
+          type: integer
+          minimum: 0
+          description: Weight (grams)
+        bulk_return_fee:
+          type: number
+          format: double
+          minimum: 0
+          description: Bulk return fees (€)
+    PatchedUpdateShop:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the shop
+          maxLength: 128
+        description:
+          type: string
+          description: 'Description of your shop. These HTML tags are authorized:
+            ''a'', ''abbr'', ''acronym'', ''b'', ''blockquote'', ''code'', ''em'',
+            ''i'', ''li'', ''ol''''strong'', ''ul'', ''p'', ''span'', ''h1'', ''h2'',
+            ''h3'', ''h4'', ''h5'', ''h6'', ''pre'''
+        city:
+          type: string
+          description: Shop city. Useful for hand delivery
+          maxLength: 128
+        image:
+          type: string
+          format: uri
+          description: An image to represent your shop. Upload using multipart format
+        language_code:
+          allOf:
+          - $ref: '#/components/schemas/LanguageCodeEnum'
+          description: |-
+            Language used to write description and comments about the products
+
+            * `en` - English
+            * `fr` - Français
+        bank_account_iban:
+          type: string
+          description: IBAN of the account where benefits must be transferred
+          maxLength: 34
+        bank_account_bic:
+          type: string
+          nullable: true
+          description: BIC of the account where benefits must be transferred
+          maxLength: 11
+        postaladdress:
+          allOf:
+          - $ref: '#/components/schemas/PostalAddressWrite'
+          nullable: true
+          description: Postal address of your shop. Only country will be publicly
+            displayed, other information will only be shared with your clients. Update
+            fields using a 'postaladdress' dict param. See PostalAddressWriteSerializer
+            for fields list.
+        parcelshop_code:
+          type: string
+          description: Identifier of default MondialRelay parcelshop
+          pattern: ^[A-Za-z]{2}-[0-9]{6}$
+    PostalAddressRead:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        text_string:
+          type: string
+          readOnly: true
+        html_string:
+          type: string
+          readOnly: true
+        country:
+          $ref: '#/components/schemas/Country'
+        address:
+          type: string
+          maxLength: 128
+        address2:
+          type: string
+          maxLength: 128
+        postal_code:
+          type: string
+          maxLength: 12
+        city:
+          type: string
+          maxLength: 128
+      required:
+      - country
+      - html_string
+      - id
+      - text_string
+    PostalAddressWrite:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        address:
+          type: string
+          maxLength: 128
+        address2:
+          type: string
+          maxLength: 128
+        postal_code:
+          type: string
+          maxLength: 12
+        city:
+          type: string
+          maxLength: 128
+        country:
+          $ref: '#/components/schemas/CountryEnum'
+      required:
+      - id
+    PrivateCoupon:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        url:
+          type: string
+          readOnly: true
+        code:
+          type: string
+          maxLength: 16
+          minLength: 6
+        discount_value:
+          type: integer
+          maximum: 2147483647
+          minimum: 1
+        discount_type:
+          $ref: '#/components/schemas/DiscountTypeEnum'
+        usage_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        max_usage_count:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        validity_end:
+          type: string
+          format: date
+          nullable: true
+        restrict_to_product:
+          type: integer
+          nullable: true
+        minimal_rental_duration:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/MinimalRentalDurationEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        comment:
+          type: string
+        is_visible:
+          type: boolean
+          description: Publicly visible coupon?
+      required:
+      - code
+      - id
+      - is_visible
+      - url
+    PrivateCustomProduct:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        url:
+          type: string
+          readOnly: true
+        public_url:
+          type: string
+          readOnly: true
+          description: URL of the set on the website
+        type_label:
+          type: string
+          readOnly: true
+        product_name:
+          type: string
+          readOnly: true
+        product_type:
+          allOf:
+          - $ref: '#/components/schemas/ProductTypeEnum'
+          description: |-
+            Product type (MOC, bulk parts, others)
+
+            * `BULK` - Bulk
+            * `MOC` - MOC
+            * `OTHER` - Other
+        slug:
+          type: string
+          description: slug representing product name
+          maxLength: 128
+          pattern: ^[-a-zA-Z0-9_]+$
+        content_description:
+          type: string
+          title: Description
+          description: product description
+        integration_date:
+          type: string
+          format: date
+          readOnly: true
+          description: Date when the set was added to your inventory
+        rental_price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Price / 1 month (€)
+        rental_price_without_delivery:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Price / 1 month (€) if hand delivered
+        deposit:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Deposit amount (€)
+        is_available:
+          type: boolean
+          description: Set available for rental?
+        comment:
+          type: string
+          description: Comment on product condition
+        private_comment:
+          type: string
+          description: Private comment about product (only visible to product owner)
+        product_weight:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Weight (grams)
+          description: Weight (grams)
+        default_image:
+          allOf:
+          - $ref: '#/components/schemas/CustomProductImage'
+          description: Image by default of the set
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomProductImage'
+      required:
+      - content_description
+      - default_image
+      - id
+      - images
+      - integration_date
+      - product_name
+      - product_weight
+      - public_url
+      - rental_price
+      - slug
+      - type_label
+      - url
+    PrivateRentableProduct:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        url:
+          type: string
+          readOnly: true
+        product_name:
+          type: string
+          readOnly: true
+        integration_date:
+          type: string
+          format: date
+          readOnly: true
+          description: Date when the set was added to your inventory
+        rental_price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Price / 1 month (€)
+        rental_price_without_delivery:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Price / 1 month (€) if hand delivered
+        deposit:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Deposit amount (€)
+        is_available:
+          type: boolean
+          description: Set available for rental?
+        comment:
+          type: string
+          description: Comment on product condition
+        private_comment:
+          type: string
+          description: Private comment about product (only visible to product owner)
+        product_weight:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Weight (grams)
+          description: Weight (grams)
+      required:
+      - id
+      - integration_date
+      - product_name
+      - product_weight
+      - rental_price
+      - url
+    PrivateRentableSet:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        url:
+          type: string
+          readOnly: true
+        set:
+          $ref: '#/components/schemas/SimpleLegoSet'
+        integration_date:
+          type: string
+          format: date
+          readOnly: true
+          description: Date when the set was added to your inventory
+        rental_price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Price / 1 month (€)
+        rental_price_without_delivery:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Price / 1 month (€) if hand delivered
+        deposit:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Deposit amount (€)
+        auto_update_deposit:
+          type: boolean
+          description: Automatic deposit update
+        is_available:
+          type: boolean
+          description: Set available for rental?
+        sorting_type:
+          nullable: true
+          description: |-
+            Sorting type
+
+            * `COLOR` - Color
+            * `BAG_NUMBER` - Numbered bags
+            * `OTHER` - Other
+          oneOf:
+          - $ref: '#/components/schemas/SortingTypeEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        comment:
+          type: string
+          description: Comment on product condition
+        private_comment:
+          type: string
+          description: Private comment about product (only visible to product owner)
+        product_weight:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Weight (grams)
+          description: Weight (grams)
+        bulk_return_fee:
+          type: number
+          format: double
+          nullable: true
+          description: Bulk return fees (€)
+      required:
+      - id
+      - integration_date
+      - product_weight
+      - rental_price
+      - set
+      - url
+    PrivateShop:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the shop
+          maxLength: 128
+        description:
+          type: string
+          description: Description of the shop by the owner
+        city:
+          type: string
+          description: Shop city. Useful for hand delivery
+          maxLength: 128
+        image:
+          type: string
+          format: uri
+          description: Image of the shop
+        address:
+          allOf:
+          - $ref: '#/components/schemas/PostalAddressRead'
+          description: Shop postal address
+        language_code:
+          allOf:
+          - $ref: '#/components/schemas/LanguageCodeEnum'
+          description: |-
+            Language used to write description and comments about the products
+
+            * `en` - English
+            * `fr` - Français
+        parcelshop:
+          $ref: '#/components/schemas/ParcelShop'
+        bank_account_iban:
+          type: string
+          description: IBAN of the account where benefits must be transferred
+          maxLength: 34
+        bank_account_bic:
+          type: string
+          nullable: true
+          description: BIC of the account where benefits must be transferred
+          maxLength: 11
+        creation_date:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Date of shop registration
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+          readOnly: true
+          description: Reviews left by clients
+      required:
+      - address
+      - bank_account_iban
+      - creation_date
+      - name
+      - parcelshop
+      - reviews
+    ProductAvailability:
+      type: object
+      properties:
+        shop:
+          $ref: '#/components/schemas/PublicShop'
+        rental_price:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Price / 1 month (€)
+        deposit:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Deposit amount (€)
+        comment:
+          type: string
+          description: Comment on product condition
+        product_weight:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Weight (grams)
+          description: Weight (grams)
+        is_available:
+          type: boolean
+          description: Set available for rental?
+        estimated_return_date:
+          type: string
+          format: date
+          readOnly: true
+      required:
+      - estimated_return_date
+      - product_weight
+      - rental_price
+      - shop
+    ProductTypeEnum:
+      enum:
+      - BULK
+      - MOC
+      - OTHER
+      type: string
+      description: |-
+        * `BULK` - Bulk
+        * `MOC` - MOC
+        * `OTHER` - Other
+    PublicCustomProduct:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        product_name:
+          type: string
+          readOnly: true
+        rental_price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Price / 1 month (€)
+        rental_price_without_delivery:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+          description: Price / 1 month (€) if hand delivered
+        deposit:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Deposit amount (€)
+        is_available:
+          type: boolean
+          description: Set available for rental?
+        comment:
+          type: string
+          description: Comment on product condition
+        product_weight:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Weight (grams)
+          description: Weight (grams)
+        website_url:
+          type: string
+          readOnly: true
+          description: URL of the product on the website
+        image_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomProductImage'
+        default_image:
+          allOf:
+          - $ref: '#/components/schemas/CustomProductImage'
+          description: Image by default of the product
+        type_label:
+          type: string
+          readOnly: true
+        slug:
+          type: string
+          description: slug representing product name
+          maxLength: 128
+          pattern: ^[-a-zA-Z0-9_]+$
+        content_description:
+          type: string
+          title: Description
+          description: product description
+        product_type:
+          allOf:
+          - $ref: '#/components/schemas/ProductTypeEnum'
+          description: |-
+            Product type (MOC, bulk parts, others)
+
+            * `BULK` - Bulk
+            * `MOC` - MOC
+            * `OTHER` - Other
+        average_rate:
+          type: number
+          format: double
+          readOnly: true
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+          readOnly: true
+          description: Reviews left by clients
+      required:
+      - average_rate
+      - content_description
+      - default_image
+      - id
+      - image_list
+      - product_name
+      - product_weight
+      - rental_price
+      - reviews
+      - slug
+      - type_label
+      - website_url
+    PublicRentableSet:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        set:
+          $ref: '#/components/schemas/SimpleLegoSet'
+        rental_price:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Price / 1 month (€)
+        rental_price_without_delivery:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+          description: Price / 1 month (€) if hand delivered
+        deposit:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Deposit amount (€)
+        is_available:
+          type: boolean
+          description: Set available for rental?
+        sorting_type:
+          nullable: true
+          description: |-
+            Sorting type
+
+            * `COLOR` - Color
+            * `BAG_NUMBER` - Numbered bags
+            * `OTHER` - Other
+          oneOf:
+          - $ref: '#/components/schemas/SortingTypeEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        comment:
+          type: string
+          description: Comment on product condition
+        product_weight:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Weight (grams)
+          description: Weight (grams)
+        bulk_return_fee:
+          type: number
+          format: double
+          nullable: true
+          description: Bulk return fees (€)
+      required:
+      - id
+      - product_weight
+      - rental_price
+      - set
+    PublicShop:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        website_url:
+          type: string
+          readOnly: true
+          description: URL of the shop on the website
+        slug:
+          type: string
+          description: slug representing shop name
+          maxLength: 128
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          description: Name of the shop
+          maxLength: 128
+        description:
+          type: string
+          description: Description of the shop by the owner
+        country:
+          $ref: '#/components/schemas/Country'
+        city:
+          type: string
+        image:
+          type: string
+          format: uri
+          description: Image of the shop
+        set_list:
+          type: string
+          readOnly: true
+        is_open:
+          type: boolean
+          readOnly: true
+        set_count:
+          type: integer
+          readOnly: true
+        average_rate:
+          type: number
+          format: double
+          readOnly: true
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+          readOnly: true
+        options:
+          type: object
+          additionalProperties:
+            type: string
+          readOnly: true
+          description: specitfy if shop has enabled different options.
+      required:
+      - average_rate
+      - city
+      - country
+      - is_open
+      - name
+      - options
+      - reviews
+      - set_count
+      - set_list
+      - slug
+      - url
+      - website_url
+    PublicUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+      required:
+      - id
+      - username
+    RebrickableSet:
+      type: object
+      properties:
+        id:
+          type: string
+          description: same as set_num, but mandatory for internal reaons
+        set_num:
+          type: string
+          maxLength: 20
+        name:
+          type: string
+          maxLength: 256
+        year:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        img_url:
+          type: string
+          maxLength: 256
+      required:
+      - id
+      - img_url
+      - name
+      - set_num
+      - year
+    Review:
+      type: object
+      properties:
+        publication_date:
+          type: string
+          format: date-time
+          readOnly: true
+        comment:
+          type: string
+        rate:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          title: Note
+        author:
+          type: string
+          readOnly: true
+      required:
+      - author
+      - publication_date
+      - rate
+    SetAvailability:
+      type: object
+      properties:
+        shop:
+          $ref: '#/components/schemas/PublicShop'
+        rental_price:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Price / 1 month (€)
+        deposit:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Deposit amount (€)
+        comment:
+          type: string
+          description: Comment on product condition
+        product_weight:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Weight (grams)
+          description: Weight (grams)
+        is_available:
+          type: boolean
+          description: Set available for rental?
+        estimated_return_date:
+          type: string
+          format: date
+          readOnly: true
+        bulk_return_fee:
+          type: number
+          format: double
+          nullable: true
+          description: Bulk return fees (€)
+      required:
+      - estimated_return_date
+      - product_weight
+      - rental_price
+      - shop
+    SetInventory:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        set:
+          allOf:
+          - $ref: '#/components/schemas/RebrickableSet'
+          readOnly: true
+        total_part_count:
+          type: integer
+          readOnly: true
+        bag_count:
+          type: integer
+          readOnly: true
+          description: number of bags composing the set inventory
+        author:
+          $ref: '#/components/schemas/InventoryAuthor'
+        author_username:
+          type: string
+        website_url:
+          type: string
+          readOnly: true
+          description: URL of inventory page on website
+      required:
+      - author
+      - author_username
+      - bag_count
+      - set
+      - total_part_count
+      - url
+      - website_url
+    SetInventoryWithBags:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        set:
+          allOf:
+          - $ref: '#/components/schemas/RebrickableSet'
+          readOnly: true
+        total_part_count:
+          type: integer
+          readOnly: true
+        bag_count:
+          type: integer
+          readOnly: true
+          description: number of bags composing the set inventory
+        author:
+          $ref: '#/components/schemas/InventoryAuthor'
+        author_username:
+          type: string
+        website_url:
+          type: string
+          readOnly: true
+          description: URL of inventory page on website
+        bag_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/BagInventory'
+      required:
+      - author
+      - author_username
+      - bag_count
+      - bag_list
+      - set
+      - total_part_count
+      - url
+      - website_url
+    SimpleLegoSet:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        public_url:
+          type: string
+          readOnly: true
+          description: URL of the set on the website
+        name:
+          type: string
+          readOnly: true
+          description: Name of the set, in your language
+        slug:
+          type: string
+          maxLength: 128
+          pattern: ^[-a-zA-Z0-9_]+$
+        detailed_name:
+          type: string
+          readOnly: true
+          description: Name and LEGO® identifier of the set
+        themes:
+          type: array
+          items:
+            $ref: '#/components/schemas/SimpleLegoTheme'
+        weight:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Weight (grams)
+        lego_id:
+          type: string
+          description: LEGO® set identifier
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        default_image:
+          allOf:
+          - $ref: '#/components/schemas/LegoSetImage'
+          description: Image by default of the set
+        part_count:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Parts count
+        minifig_count:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Minifig count
+      required:
+      - default_image
+      - detailed_name
+      - id
+      - lego_id
+      - name
+      - public_url
+      - slug
+      - themes
+      - url
+    SimpleLegoTheme:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the theme
+          maxLength: 128
+        full_name:
+          type: string
+          readOnly: true
+          description: string representing theme name and parent name
+        parent_theme:
+          type: string
+          readOnly: true
+          description: id of parent theme if exists, else None
+      required:
+      - full_name
+      - name
+      - parent_theme
+    SortingTypeEnum:
+      enum:
+      - COLOR
+      - BAG_NUMBER
+      - OTHER
+      type: string
+      description: |-
+        * `COLOR` - Color
+        * `BAG_NUMBER` - Numbered bags
+        * `OTHER` - Other
+    UpdateCustomProduct:
+      type: object
+      properties:
+        product_name:
+          type: string
+        product_type:
+          $ref: '#/components/schemas/ProductTypeEnum'
+        content_description:
+          type: string
+          title: Description
+          description: product description
+        rental_price:
+          type: integer
+          minimum: 0
+          description: Price / 1 month (€)
+        rental_price_without_delivery:
+          type: integer
+          minimum: 0
+          description: Price / 1 month (€) if hand delivered
+        deposit:
+          type: integer
+          minimum: 0
+          description: Deposit amount (€)
+        is_available:
+          type: boolean
+          description: Set available for rental?
+        comment:
+          type: string
+          default: ''
+          description: Comment on product condition
+        private_comment:
+          type: string
+          default: ''
+          description: Private comment about product (visible only to product owner)
+        product_weight:
+          type: integer
+          minimum: 0
+          description: Weight (grams)
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomProductImage'
+      required:
+      - content_description
+      - deposit
+      - is_available
+      - product_name
+      - product_type
+      - product_weight
+      - rental_price
+    UpdateRentableSet:
+      type: object
+      properties:
+        rental_price:
+          type: integer
+          minimum: 0
+          description: Price / 1 month (€)
+        rental_price_without_delivery:
+          type: integer
+          minimum: 0
+          description: Price / 1 month (€) if hand delivered
+        deposit:
+          type: integer
+          minimum: 0
+          description: Deposit amount (€)
+        auto_update_deposit:
+          type: boolean
+          description: Automatic deposit update
+        is_available:
+          type: boolean
+          description: Set available for rental?
+        sorting_type:
+          $ref: '#/components/schemas/SortingTypeEnum'
+        comment:
+          type: string
+          default: ''
+          description: Comment on product condition
+        private_comment:
+          type: string
+          default: ''
+          description: Private comment about product (visible only to product owner)
+        product_weight:
+          type: integer
+          minimum: 0
+          description: Weight (grams)
+        bulk_return_fee:
+          type: number
+          format: double
+          minimum: 0
+          description: Bulk return fees (€)
+      required:
+      - auto_update_deposit
+      - deposit
+      - is_available
+      - product_weight
+      - rental_price
+    UpdateShop:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the shop
+          maxLength: 128
+        description:
+          type: string
+          description: 'Description of your shop. These HTML tags are authorized:
+            ''a'', ''abbr'', ''acronym'', ''b'', ''blockquote'', ''code'', ''em'',
+            ''i'', ''li'', ''ol''''strong'', ''ul'', ''p'', ''span'', ''h1'', ''h2'',
+            ''h3'', ''h4'', ''h5'', ''h6'', ''pre'''
+        city:
+          type: string
+          description: Shop city. Useful for hand delivery
+          maxLength: 128
+        image:
+          type: string
+          format: uri
+          description: An image to represent your shop. Upload using multipart format
+        language_code:
+          allOf:
+          - $ref: '#/components/schemas/LanguageCodeEnum'
+          description: |-
+            Language used to write description and comments about the products
+
+            * `en` - English
+            * `fr` - Français
+        bank_account_iban:
+          type: string
+          description: IBAN of the account where benefits must be transferred
+          maxLength: 34
+        bank_account_bic:
+          type: string
+          nullable: true
+          description: BIC of the account where benefits must be transferred
+          maxLength: 11
+        postaladdress:
+          allOf:
+          - $ref: '#/components/schemas/PostalAddressWrite'
+          nullable: true
+          description: Postal address of your shop. Only country will be publicly
+            displayed, other information will only be shared with your clients. Update
+            fields using a 'postaladdress' dict param. See PostalAddressWriteSerializer
+            for fields list.
+        parcelshop_code:
+          type: string
+          description: Identifier of default MondialRelay parcelshop
+          pattern: ^[A-Za-z]{2}-[0-9]{6}$
+      required:
+      - bank_account_iban
+      - description
+      - image
+      - name
+    WishListItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        legoset:
+          $ref: '#/components/schemas/SimpleLegoSet'
+        registration_date:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date d'enregistrement
+      required:
+      - id
+      - legoset
+      - registration_date
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"
