@@ -1,7 +1,11 @@
 {
   "name": "@vbouchet31/locabriques-mcp-server",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "MCP Server for LocaBriques API",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vbouchet31/locabriques-mcp-server.git"
+  },
   "homepage": "https://github.com/vbouchet31/locabriques-mcp-server",
   "issues": "https://github.com/vbouchet31/locabriques-mcp-server/issues",
   "type": "module",
