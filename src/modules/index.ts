@@ -7,6 +7,7 @@ import { registerMyShopTools } from './my_shop.js';
 import { registerInventoriesTools } from './inventories.js';
 import { registerMyAccountTools } from './my_account.js';
 import { registerUserTools } from './users.js';
+import { registerMyInventoryTools } from './my_inventories.js';
 
 export function registerAllModules(server: McpServer) {
     registerShopsTools(server);
@@ -17,4 +18,5 @@ export function registerAllModules(server: McpServer) {
     registerUserTools(server);
     registerMyAccountTools(server);
     registerInventoriesTools(server);
+    registerMyInventoryTools(server);
 }

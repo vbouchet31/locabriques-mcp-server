@@ -39,6 +39,14 @@ A Model Context Protocol (MCP) server implementation for Locabriques, enabling A
 | `inventory_list` | Search sets in our inventory database. |
 | `inventory_retrieve` | Retrieve a specific inventory. |
 
+
+### 🧩 My Inventories
+
+| Tool Name | Description |
+| :--- | :--- |
+| `myinventory_list` | List your own per-bags set inventories |
+| `myinventory_create` | Register a new per-bags set inventory |
+
 ### 🏪 My Shop
 
 | Tool Name | Description |
