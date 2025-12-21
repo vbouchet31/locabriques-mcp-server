@@ -76,7 +76,7 @@ A Model Context Protocol (MCP) server implementation for Locabriques, enabling A
 | `theme_search` | Search themes in our LEGO® sets database |
 | `theme_retrieve` | Retrieve a LEGO® theme from our database |
 
-### 👤 My Account
+### 🪪 My Account
 
 | Tool Name | Description |
 | :--- | :--- |
@@ -86,7 +86,7 @@ A Model Context Protocol (MCP) server implementation for Locabriques, enabling A
 | `account_create_wishlist_item` | Add a new set in your wish list |
 | `account_delete_wishlist_item` | Remove a set from your wish list |
 
-### 👤 Users
+### 👥 Users
 
 | Tool Name | Description |
 | :--- | :--- |
