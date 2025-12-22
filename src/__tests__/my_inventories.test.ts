@@ -209,4 +209,94 @@ describe('My Inventories Tools', () => {
             });
         });
     });
+
+    describe('myinventory_list_bags', () => {
+        it('should correctly list bags for an inventory', async () => {
+            const mockData = [{ bag_number: "1" }, { bag_number: "2" }];
+            (apiClient.get as any).mockResolvedValue({ data: mockData });
+
+            const tool = tools.myinventory_list_bags;
+            if (!tool) throw new Error('Tool not found');
+
+            const result = await tool({ id: 123 });
+
+            expect(apiClient.get).toHaveBeenCalledWith('/api/inventories/mine/123/bags/');
+            expect(result).toEqual({
+                content: [
+                    {
+                        type: 'text',
+                        text: JSON.stringify(mockData, null, 2),
+                    },
+                ],
+            });
+        });
+
+        it('should handle API errors gracefully', async () => {
+            const errorMessage = 'Not Found';
+            (apiClient.get as any).mockRejectedValue(new Error(errorMessage));
+
+            const tool = tools.myinventory_list_bags;
+            if (!tool) throw new Error('Tool not found');
+
+            const result = await tool({ id: 999 });
+
+            expect(result).toEqual({
+                content: [
+                    {
+                        type: 'text',
+                        text: `Error: ${errorMessage}`,
+                    },
+                ],
+                isError: true,
+            });
+        });
+    });
+
+    describe('myinventory_create_bag', () => {
+        it('should correctly create a bag in an inventory', async () => {
+            const mockData = { id: 456, bag_number: "10" };
+            (apiClient.post as any).mockResolvedValue({ data: mockData });
+
+            const tool = tools.myinventory_create_bag;
+            if (!tool) throw new Error('Tool not found');
+
+            const result = await tool({ id: 123, bag_number: "10" });
+
+            expect(apiClient.post).toHaveBeenCalledWith('/api/inventories/mine/123/bags/', {
+                bag_number: "10"
+            }, {
+                params: {
+                    bag_number: "10"
+                }
+            });
+            expect(result).toEqual({
+                content: [
+                    {
+                        type: 'text',
+                        text: JSON.stringify(mockData, null, 2),
+                    },
+                ],
+            });
+        });
+
+        it('should handle API errors gracefully', async () => {
+            const errorMessage = 'Bad Request';
+            (apiClient.post as any).mockRejectedValue(new Error(errorMessage));
+
+            const tool = tools.myinventory_create_bag;
+            if (!tool) throw new Error('Tool not found');
+
+            const result = await tool({ id: 123, bag_number: "" }); // Invalid input ideally handled by Zod but testing API error
+
+            expect(result).toEqual({
+                content: [
+                    {
+                        type: 'text',
+                        text: `Error: ${errorMessage}`,
+                    },
+                ],
+                isError: true,
+            });
+        });
+    });
 });

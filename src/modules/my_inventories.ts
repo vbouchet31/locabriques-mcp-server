@@ -102,6 +102,7 @@ export function registerMyInventoryTools(server: McpServer) {
         }
     );
 
+
     // DELETE /api/inventories/mine/{id}/
     server.tool(
         'myinventory_delete',
@@ -117,6 +118,77 @@ export function registerMyInventoryTools(server: McpServer) {
                         {
                             type: 'text',
                             text: "Inventory deleted",
+                        },
+                    ],
+                };
+            } catch (error: any) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: `Error: ${error.message}`,
+                        },
+                    ],
+                    isError: true,
+                };
+            }
+        }
+    );
+
+    // GET /api/inventories/mine/{id}/bags/
+    server.tool(
+        'myinventory_list_bags',
+        "List all bags from an inventory",
+        {
+            id: z.number().int().describe('ID of the inventory to look up'),
+        },
+        async (params) => {
+            try {
+                const response = await apiClient.get(`/api/inventories/mine/${params.id}/bags/`);
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(response.data, null, 2),
+                        },
+                    ],
+                };
+            } catch (error: any) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: `Error: ${error.message}`,
+                        },
+                    ],
+                    isError: true,
+                };
+            }
+        }
+    );
+
+    // POST /api/inventories/mine/{id}/bags/
+    server.tool(
+        'myinventory_create_bag',
+        "Create a new bag in your inventory",
+        {
+            id: z.number().int().describe('ID of the inventory to add bag to'),
+            bag_number: z.string().min(1).max(32).describe('Bag number'),
+        },
+        async (params) => {
+            try {
+                const response = await apiClient.post(`/api/inventories/mine/${params.id}/bags/`, {
+                    bag_number: params.bag_number
+                }, {
+                    params: {
+                        bag_number: params.bag_number
+                    }
+                });
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(response.data, null, 2),
                         },
                     ],
                 };
