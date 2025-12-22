@@ -205,4 +205,71 @@ export function registerMyInventoryTools(server: McpServer) {
             }
         }
     );
+
+    // GET /api/inventories/mine/{id}/bags/{bag_number_slug}/
+    server.tool(
+        'myinventory_retrieve_bag',
+        "Retrieve a bag present in an inventory",
+        {
+            id: z.number().int().describe('ID of the inventory to look up'),
+            bag_number_slug: z.string().describe('bag number to retrieve'),
+        },
+        async (params) => {
+            try {
+                const response = await apiClient.get(`/api/inventories/mine/${params.id}/bags/${params.bag_number_slug}/`);
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(response.data, null, 2),
+                        },
+                    ],
+                };
+            } catch (error: any) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: `Error: ${error.message}`,
+                        },
+                    ],
+                    isError: true,
+                };
+            }
+        }
+    );
+
+    // DELETE /api/inventories/mine/{id}/bags/{bag_number_slug}/
+    server.tool(
+        'myinventory_delete_bag',
+        "Delete a bag from one of your inventories",
+        {
+            id: z.number().int().describe('ID of the inventory to delete bag from'),
+            bag_number_slug: z.string().describe('Slug of the bag to delete'),
+        },
+        async (params) => {
+            try {
+                await apiClient.delete(`/api/inventories/mine/${params.id}/bags/${params.bag_number_slug}/`);
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: "Bag deleted",
+                        },
+                    ],
+                };
+            } catch (error: any) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: `Error: ${error.message}`,
+                        },
+                    ],
+                    isError: true,
+                };
+            }
+        }
+    );
 }
+

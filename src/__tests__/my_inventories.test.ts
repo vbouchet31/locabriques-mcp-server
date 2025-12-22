@@ -299,4 +299,88 @@ describe('My Inventories Tools', () => {
             });
         });
     });
+
+    describe('myinventory_retrieve_bag', () => {
+        it('should correctly retrieve a bag from an inventory', async () => {
+            const mockData = { id: 123, bag_number: "bag-1", parts: [] };
+            (apiClient.get as any).mockResolvedValue({ data: mockData });
+
+            const tool = tools.myinventory_retrieve_bag;
+            if (!tool) throw new Error('Tool not found');
+
+            const result = await tool({ id: 123, bag_number_slug: "bag-1" });
+
+            expect(apiClient.get).toHaveBeenCalledWith('/api/inventories/mine/123/bags/bag-1/');
+            expect(result).toEqual({
+                content: [
+                    {
+                        type: 'text',
+                        text: JSON.stringify(mockData, null, 2),
+                    },
+                ],
+            });
+        });
+
+        it('should handle API errors gracefully', async () => {
+            const errorMessage = 'Not Found';
+            (apiClient.get as any).mockRejectedValue(new Error(errorMessage));
+
+            const tool = tools.myinventory_retrieve_bag;
+            if (!tool) throw new Error('Tool not found');
+
+            const result = await tool({ id: 123, bag_number_slug: "unknown" });
+
+            expect(result).toEqual({
+                content: [
+                    {
+                        type: 'text',
+                        text: `Error: ${errorMessage}`,
+                    },
+                ],
+                isError: true,
+            });
+        });
+    });
+
+    describe('myinventory_delete_bag', () => {
+        it('should correctly delete a bag from an inventory', async () => {
+            (apiClient.delete as any).mockResolvedValue({});
+
+            const tool = tools.myinventory_delete_bag;
+            if (!tool) throw new Error('Tool not found');
+
+            const result = await tool({ id: 123, bag_number_slug: "bag-1" });
+
+            expect(apiClient.delete).toHaveBeenCalledWith('/api/inventories/mine/123/bags/bag-1/');
+            expect(result).toEqual({
+                content: [
+                    {
+                        type: 'text',
+                        text: "Bag deleted",
+                    },
+                ],
+            });
+        });
+
+        it('should handle API errors gracefully', async () => {
+            const errorMessage = 'Forbidden';
+            (apiClient.delete as any).mockRejectedValue(new Error(errorMessage));
+
+            const tool = tools.myinventory_delete_bag;
+            if (!tool) throw new Error('Tool not found');
+
+            const result = await tool({ id: 123, bag_number_slug: "bag-protected" });
+
+            expect(result).toEqual({
+                content: [
+                    {
+                        type: 'text',
+                        text: `Error: ${errorMessage}`,
+                    },
+                ],
+                isError: true,
+            });
+        });
+    });
 });
+
