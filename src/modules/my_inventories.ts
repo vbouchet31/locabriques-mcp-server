@@ -271,5 +271,91 @@ export function registerMyInventoryTools(server: McpServer) {
             }
         }
     );
+
+    // PUT /api/inventories/mine/{id}/bags/{bag_number_slug}/
+    server.tool(
+        'myinventory_update_bag_number',
+        "Change number of a bag in an inventory",
+        {
+            id: z.number().int().describe('ID of the inventory containing the bag to update'),
+            bag_number_slug: z.string().describe('Slug of the name of the bag to update'),
+            bag_number: z.string().min(1).max(32).describe('Bag number'),
+        },
+        async (params) => {
+            try {
+                // Pass bag_number in both query (per specific param definition) and body (per requestBody) to be safe/consistent with previous patterns
+                const response = await apiClient.put(
+                    `/api/inventories/mine/${params.id}/bags/${params.bag_number_slug}/`,
+                    { bag_number: params.bag_number },
+                    { params: { bag_number: params.bag_number } }
+                );
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(response.data, null, 2),
+                        },
+                    ],
+                };
+            } catch (error: any) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: `Error: ${error.message}`,
+                        },
+                    ],
+                    isError: true,
+                };
+            }
+        }
+    );
+    // PATCH /api/inventories/mine/{id}/bags/{bag_number_slug}/
+    server.tool(
+        'myinventory_partial_update_bag',
+        "Update content of a bag in one of your own (not yet published) per-bags inventories",
+        {
+            id: z.number().int().describe('ID of the inventory containing the bag to update'),
+            bag_number_slug: z.string().describe('Slug of the name of the bag to update'),
+            part_num: z.string().regex(/^[-a-zA-Z0-9_]+$/).describe('Rebrickable part reference'),
+            color_id: z.string().regex(/^[-a-zA-Z0-9_]+$/).describe('Rebrickable color reference'),
+            quantity_used: z.number().int().describe('Quantity of part (part_num+color) present in the bag'),
+        },
+        async (params) => {
+            try {
+                // Pass parameters in both query (per OpenAPI spec) and body (for potential flexibility/correctness)
+                const queryParams = {
+                    part_num: params.part_num,
+                    color_id: params.color_id,
+                    quantity_used: params.quantity_used
+                };
+
+                const response = await apiClient.patch(
+                    `/api/inventories/mine/${params.id}/bags/${params.bag_number_slug}/`,
+                    queryParams, // Body
+                    { params: queryParams } // Query params
+                );
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(response.data, null, 2),
+                        },
+                    ],
+                };
+            } catch (error: any) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: `Error: ${error.message}`,
+                        },
+                    ],
+                    isError: true,
+                };
+            }
+        }
+    );
 }
+
 

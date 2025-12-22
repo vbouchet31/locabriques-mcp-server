@@ -52,6 +52,8 @@ A Model Context Protocol (MCP) server implementation for Locabriques, enabling A
 | `myinventory_create_bag` | Create a new bag in your inventory |
 | `myinventory_retrieve_bag` | Retrieve a bag present in an inventory |
 | `myinventory_delete_bag` | Delete a bag from one of your inventories |
+| `myinventory_update_bag_number` | Change number of a bag in an inventory |
+| `myinventory_partial_update_bag` | Update content of a bag in one of your own (not yet published) per-bags inventories |
 
 ### 🏪 My Shop
 

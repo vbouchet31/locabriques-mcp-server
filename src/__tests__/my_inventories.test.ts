@@ -9,6 +9,8 @@ vi.mock('../lib/api-client.js', () => ({
     apiClient: {
         get: vi.fn(),
         post: vi.fn(),
+        put: vi.fn(),
+        patch: vi.fn(),
         delete: vi.fn(),
     },
 }));
@@ -382,5 +384,119 @@ describe('My Inventories Tools', () => {
             });
         });
     });
+
+    describe('myinventory_update_bag_number', () => {
+        it('should correctly update a bag number', async () => {
+            const mockData = { id: 123, bag_number: "bag-2" };
+            (apiClient.put as any).mockResolvedValue({ data: mockData });
+
+            const tool = tools.myinventory_update_bag_number;
+            if (!tool) throw new Error('Tool not found');
+
+            const result = await tool({ id: 123, bag_number_slug: "bag-1", bag_number: "bag-2" });
+
+            expect(apiClient.put).toHaveBeenCalledWith(
+                '/api/inventories/mine/123/bags/bag-1/',
+                { bag_number: "bag-2" },
+                { params: { bag_number: "bag-2" } }
+            );
+            expect(result).toEqual({
+                content: [
+                    {
+                        type: 'text',
+                        text: JSON.stringify(mockData, null, 2),
+                    },
+                ],
+            });
+        });
+
+        it('should handle API errors gracefully', async () => {
+            const errorMessage = 'Conflict';
+            (apiClient.put as any).mockRejectedValue(new Error(errorMessage));
+
+            const tool = tools.myinventory_update_bag_number;
+            if (!tool) throw new Error('Tool not found');
+
+            const result = await tool({ id: 123, bag_number_slug: "bag-1", bag_number: "bag-2" });
+
+            expect(result).toEqual({
+                content: [
+                    {
+                        type: 'text',
+                        text: `Error: ${errorMessage}`,
+                    },
+                ],
+                isError: true,
+            });
+        });
+    });
+    describe('myinventory_partial_update_bag', () => {
+        it('should correctly partial update a bag content', async () => {
+            const mockData = { delta: 0 };
+            (apiClient.patch as any).mockResolvedValue({ data: mockData });
+
+            const tool = tools.myinventory_partial_update_bag;
+            if (!tool) throw new Error('Tool not found');
+
+            const params = {
+                id: 123,
+                bag_number_slug: "bag-1",
+                part_num: "3001",
+                color_id: "15",
+                quantity_used: 5
+            };
+
+            const result = await tool(params);
+
+            const expectedPayload = {
+                part_num: "3001",
+                color_id: "15",
+                quantity_used: 5
+            };
+
+            expect(apiClient.patch).toHaveBeenCalledWith(
+                '/api/inventories/mine/123/bags/bag-1/',
+                expectedPayload,
+                { params: expectedPayload }
+            );
+            expect(result).toEqual({
+                content: [
+                    {
+                        type: 'text',
+                        text: JSON.stringify(mockData, null, 2),
+                    },
+                ],
+            });
+        });
+
+        it('should handle API errors gracefully', async () => {
+            const errorMessage = 'Bad Request';
+            (apiClient.patch as any).mockRejectedValue(new Error(errorMessage));
+
+            const tool = tools.myinventory_partial_update_bag;
+            if (!tool) throw new Error('Tool not found');
+
+            const params = {
+                id: 123,
+                bag_number_slug: "bag-1",
+                part_num: "3001",
+                color_id: "15",
+                quantity_used: -1 // Invalid quantity
+            };
+
+            const result = await tool(params);
+
+            expect(result).toEqual({
+                content: [
+                    {
+                        type: 'text',
+                        text: `Error: ${errorMessage}`,
+                    },
+                ],
+                isError: true,
+            });
+        });
+    });
 });
+
 
