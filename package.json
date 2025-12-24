@@ -1,6 +1,6 @@
 {
   "name": "@vbouchet31/locabriques-mcp-server",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "MCP Server for LocaBriques API",
   "repository": {
     "type": "git",
@@ -9,16 +9,17 @@
   "homepage": "https://github.com/vbouchet31/locabriques-mcp-server",
   "issues": "https://github.com/vbouchet31/locabriques-mcp-server/issues",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "./bin/cli.js",
   "bin": {
-    "locabriques-mcp": "./dist/index.js"
+    "locabriques-mcp": "./bin/cli.js"
   },
   "files": [
+    "bin",
     "dist"
   ],
   "scripts": {
     "build": "tsc",
-    "generate-types": "openapi-typescript openapi.yaml -o src/types/openapi.d.ts",
+    "generate-types": "openapi-typescript _docs/openapi.yaml -o src/types/openapi.d.ts",
     "prepublishOnly": "npm run build",
     "test": "vitest run"
   },
