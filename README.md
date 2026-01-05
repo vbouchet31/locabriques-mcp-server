@@ -54,6 +54,7 @@ A Model Context Protocol (MCP) server implementation for Locabriques, enabling A
 | `myinventory_delete_bag` | Delete a bag from one of your inventories |
 | `myinventory_update_bag_number` | Change number of a bag in an inventory |
 | `myinventory_partial_update_bag` | Update content of a bag in one of your own (not yet published) per-bags inventories |
+| `myinventory_publish` | Publish one of you per-bags set inventory |
 
 ### 🏪 My Shop
 

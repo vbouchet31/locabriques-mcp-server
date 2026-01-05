@@ -356,6 +356,38 @@ export function registerMyInventoryTools(server: McpServer) {
             }
         }
     );
+
+    // POST /api/inventories/mine/{id}/publish/
+    server.tool(
+        'myinventory_publish',
+        "Publish one of you per-bags set inventory",
+        {
+            id: z.number().int().describe('A unique integer value identifying this Per-bags inventory.'),
+        },
+        async (params) => {
+            try {
+                const response = await apiClient.post(`/api/inventories/mine/${params.id}/publish/`);
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(response.data, null, 2),
+                        },
+                    ],
+                };
+            } catch (error: any) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: `Error: ${error.message}`,
+                        },
+                    ],
+                    isError: true,
+                };
+            }
+        }
+    );
 }
 
 

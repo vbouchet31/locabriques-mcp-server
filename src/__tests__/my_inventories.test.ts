@@ -497,6 +497,48 @@ describe('My Inventories Tools', () => {
             });
         });
     });
+
+    describe('myinventory_publish', () => {
+        it('should correctly publish an inventory', async () => {
+            const mockData = { id: 123, status: 'published' };
+            (apiClient.post as any).mockResolvedValue({ data: mockData });
+
+            const tool = tools.myinventory_publish;
+            if (!tool) throw new Error('Tool not found');
+
+            const result = await tool({ id: 123 });
+
+            expect(apiClient.post).toHaveBeenCalledWith('/api/inventories/mine/123/publish/');
+            expect(result).toEqual({
+                content: [
+                    {
+                        type: 'text',
+                        text: JSON.stringify(mockData, null, 2),
+                    },
+                ],
+            });
+        });
+
+        it('should handle API errors gracefully', async () => {
+            const errorMessage = 'Not Found';
+            (apiClient.post as any).mockRejectedValue(new Error(errorMessage));
+
+            const tool = tools.myinventory_publish;
+            if (!tool) throw new Error('Tool not found');
+
+            const result = await tool({ id: 999 });
+
+            expect(result).toEqual({
+                content: [
+                    {
+                        type: 'text',
+                        text: `Error: ${errorMessage}`,
+                    },
+                ],
+                isError: true,
+            });
+        });
+    });
 });
 
 
