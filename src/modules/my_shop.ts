@@ -431,11 +431,11 @@ export function registerMyShopTools(server: McpServer) {
 
     // Correction:
     const RentableSetBaseStrictSchema = z.object({
-        rental_price: z.number().int().min(0).optional().describe('Price / 1 month (€)'),
+        rental_price: z.number().int().min(0).describe('Price / 1 month (€)'),
         rental_price_without_delivery: z.number().int().min(0).optional().describe('Price / 1 month (€) if hand delivered'),
         deposit: z.number().int().min(0).describe('Deposit amount (€)'),
-        auto_update_deposit: z.boolean().describe('Automatic deposit update'), // Required
-        is_available: z.boolean().optional().describe('Set available for rental?'),
+        auto_update_deposit: z.boolean().describe('Automatic deposit update'),
+        is_available: z.boolean().describe('Set available for rental?'),
         sorting_type: SortingTypeEnum.optional(),
         comment: z.string().optional().describe('Comment on product condition'),
         private_comment: z.string().optional().describe('Private comment about product (visible only to product owner)'),
