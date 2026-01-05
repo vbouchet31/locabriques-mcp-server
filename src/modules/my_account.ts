@@ -41,6 +41,43 @@ export function registerMyAccountTools(server: McpServer) {
     );
 
     server.tool(
+        "account_create_stock_alert",
+        "Register a new 'back in stock' alert. This action allows you to create a new 'back in stock' alert for a set using it's LEGO id (for example '10333-1' for 'The Lord of the Rings: Barad-dûr')",
+        {
+            legoset_lego_id: z
+                .string()
+                .max(20)
+                .nullable()
+                .describe("The LEGO® identifier of the set"),
+        },
+        async ({ legoset_lego_id }) => {
+            try {
+                const response = await apiClient.post("/api/my_account/backinstockalerts/", {
+                    legoset_lego_id,
+                });
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: JSON.stringify(response.data, null, 2),
+                        },
+                    ],
+                };
+            } catch (error) {
+                return {
+                    isError: true,
+                    content: [
+                        {
+                            type: "text",
+                            text: formatError(error),
+                        },
+                    ],
+                };
+            }
+        }
+    );
+
+    server.tool(
         "account_delete_stock_alert",
         "Remove a 'back in stock' alert. This action allows you to remove a 'back in stock' alert.",
         {

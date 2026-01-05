@@ -1,5 +1,6 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { z } from 'zod';
 import { registerMyAccountTools } from '../modules/my_account.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { apiClient } from '../lib/api-client.js';
@@ -60,6 +61,42 @@ describe('My Account Module', () => {
 
             expect(result.isError).toBe(true);
             expect(result.content[0].text).toBe('API Failure');
+        });
+    });
+
+    describe('account_create_stock_alert', () => {
+        it('should register account_create_stock_alert tool', () => {
+            expect(tools).toHaveProperty('account_create_stock_alert');
+        });
+
+        it('should validate input schema', () => {
+            const shape = tools['account_create_stock_alert'].schema;
+            const schemaObject = z.object(shape);
+
+            expect(schemaObject.safeParse({ legoset_lego_id: '10333-1' }).success).toBe(true);
+            expect(schemaObject.safeParse({ legoset_lego_id: 'a'.repeat(21) }).success).toBe(false); // Max 20 chars
+            expect(schemaObject.safeParse({ legoset_lego_id: null }).success).toBe(true);
+        });
+
+        it('should call API correctly to create alert', async () => {
+            const handler = tools['account_create_stock_alert'].handler;
+            const mockResponse = { id: 1, legoset_lego_id: "10333-1" };
+            (apiClient.post as any).mockResolvedValue({ data: mockResponse });
+
+            const result = await handler({ legoset_lego_id: "10333-1" });
+
+            expect(apiClient.post).toHaveBeenCalledWith('/api/my_account/backinstockalerts/', { legoset_lego_id: "10333-1" });
+            expect(JSON.parse(result.content[0].text)).toEqual(mockResponse);
+        });
+
+        it('should handle API errors gracefully', async () => {
+            const handler = tools['account_create_stock_alert'].handler;
+            (apiClient.post as any).mockRejectedValue(new Error('Creation Failed'));
+
+            const result = await handler({ legoset_lego_id: "10333-1" });
+
+            expect(result.isError).toBe(true);
+            expect(result.content[0].text).toBe('Creation Failed');
         });
     });
 

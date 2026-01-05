@@ -88,6 +88,7 @@ A Model Context Protocol (MCP) server implementation for Locabriques, enabling A
 | Tool Name | Description |
 | :--- | :--- |
 | `account_list_stock_alerts` | List all your 'back in stock' alerts |
+| `account_create_stock_alert` | Register a new 'back in stock' alert |
 | `account_delete_stock_alert` | Remove a 'back in stock' alert |
 | `account_list_wishlist` | List all sets in your wish list |
 | `account_create_wishlist_item` | Add a new set in your wish list |
