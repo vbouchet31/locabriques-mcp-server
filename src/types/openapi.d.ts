@@ -305,6 +305,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/inventories/mine/{id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Publish one of you per-bags set inventory
+         * @description This action allows you to publish one of your new per-bags inventory, making it visible byeveryone. You won't be able to edit it after that
+         */
+        post: operations["inventories_mine_publish_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/legosets/": {
         parameters: {
             query?: never;
@@ -378,7 +398,11 @@ export interface paths {
          */
         get: operations["my_account_backinstockalerts_list"];
         put?: never;
-        post?: never;
+        /**
+         * Register a new 'back in stock' alert
+         * @description This action allows you to create a new 'back in stock' alert for a set using it's LEGO id (for example '10333-1' for 'The Lord of the Rings: Barad-dûr')
+         */
+        post: operations["my_account_backinstockalerts_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1363,6 +1387,9 @@ export interface components {
          * @enum {string}
          */
         CountryEnum: "AF" | "AX" | "AL" | "DZ" | "AS" | "AD" | "AO" | "AI" | "AQ" | "AG" | "AR" | "AM" | "AW" | "AU" | "AT" | "AZ" | "BS" | "BH" | "BD" | "BB" | "BY" | "BE" | "BZ" | "BJ" | "BM" | "BT" | "BO" | "BQ" | "BA" | "BW" | "BV" | "BR" | "IO" | "BN" | "BG" | "BF" | "BI" | "CV" | "KH" | "CM" | "CA" | "KY" | "CF" | "TD" | "CL" | "CN" | "CX" | "CC" | "CO" | "KM" | "CG" | "CD" | "CK" | "CR" | "CI" | "HR" | "CU" | "CW" | "CY" | "CZ" | "DK" | "DJ" | "DM" | "DO" | "EC" | "EG" | "SV" | "GQ" | "ER" | "EE" | "SZ" | "ET" | "FK" | "FO" | "FJ" | "FI" | "FR" | "GF" | "PF" | "TF" | "GA" | "GM" | "GE" | "DE" | "GH" | "GI" | "GR" | "GL" | "GD" | "GP" | "GU" | "GT" | "GG" | "GN" | "GW" | "GY" | "HT" | "HM" | "VA" | "HN" | "HK" | "HU" | "IS" | "IN" | "ID" | "IR" | "IQ" | "IE" | "IM" | "IL" | "IT" | "JM" | "JP" | "JE" | "JO" | "KZ" | "KE" | "KI" | "KW" | "KG" | "LA" | "LV" | "LB" | "LS" | "LR" | "LY" | "LI" | "LT" | "LU" | "MO" | "MG" | "MW" | "MY" | "MV" | "ML" | "MT" | "MH" | "MQ" | "MR" | "MU" | "YT" | "MX" | "FM" | "MD" | "MC" | "MN" | "ME" | "MS" | "MA" | "MZ" | "MM" | "NA" | "NR" | "NP" | "NL" | "NC" | "NZ" | "NI" | "NE" | "NG" | "NU" | "NF" | "KP" | "MK" | "MP" | "NO" | "OM" | "PK" | "PW" | "PS" | "PA" | "PG" | "PY" | "PE" | "PH" | "PN" | "PL" | "PT" | "PR" | "QA" | "RE" | "RO" | "RU" | "RW" | "BL" | "SH" | "KN" | "LC" | "MF" | "PM" | "VC" | "WS" | "SM" | "ST" | "SA" | "SN" | "RS" | "SC" | "SL" | "SG" | "SX" | "SK" | "SI" | "SB" | "SO" | "ZA" | "GS" | "KR" | "SS" | "ES" | "LK" | "SD" | "SR" | "SJ" | "SE" | "CH" | "SY" | "TW" | "TJ" | "TZ" | "TH" | "TL" | "TG" | "TK" | "TO" | "TT" | "TN" | "TR" | "TM" | "TC" | "TV" | "UG" | "UA" | "AE" | "GB" | "UM" | "US" | "UY" | "UZ" | "VU" | "VE" | "VN" | "VG" | "VI" | "WF" | "EH" | "YE" | "ZM" | "ZW";
+        CreateBackInStockAlert: {
+            legoset_lego_id?: string | null;
+        };
         CreateBagInventory: {
             bag_number: string;
         };
@@ -1572,6 +1599,8 @@ export interface components {
             author_username: string;
             /** @description URL of inventory page on website */
             readonly website_url: string;
+            /** Format: date-time */
+            published_on?: string | null;
             bag_list: components["schemas"]["BagInventory"][];
         };
         /** @enum {unknown} */
@@ -2262,6 +2291,8 @@ export interface components {
             author_username: string;
             /** @description URL of inventory page on website */
             readonly website_url: string;
+            /** Format: date-time */
+            published_on?: string | null;
         };
         SetInventoryWithBags: {
             /** Format: uri */
@@ -2274,6 +2305,8 @@ export interface components {
             author_username: string;
             /** @description URL of inventory page on website */
             readonly website_url: string;
+            /** Format: date-time */
+            published_on?: string | null;
             bag_list: components["schemas"]["BagInventory"][];
         };
         SimpleLegoSet: {
@@ -3352,7 +3385,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Not found */
+            /** @description Not found (does not exist, not yours, or already published */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3410,12 +3443,62 @@ export interface operations {
             };
         };
     };
+    inventories_mine_publish_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Published. Inventory in response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SetInventory"];
+                };
+            };
+            /** @description Bad request (something invalid, more info in response body) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized (more info in response body) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found (id does not exist, inventory is not yours or already published) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Business logic problem (more info in response body) */
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     legosets_list: {
         parameters: {
             query?: {
                 /** @description A page number within the paginated result set. */
                 page?: number;
-                /** @description Search sets by name, description, headline or LEGO® identifier. Only sets matching the whole string will be returned. This detabase only contains sets that have been previously integrated by a user. */
+                /** @description Search sets by name, description, headline or LEGO® identifier. Only sets matching the whole string will be returned. This database only contains sets that have been previously integrated by a user. */
                 search?: string;
             };
             header?: never;
@@ -3581,6 +3664,53 @@ export interface operations {
             };
         };
     };
+    my_account_backinstockalerts_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CreateBackInStockAlert"];
+                "application/x-www-form-urlencoded": components["schemas"]["CreateBackInStockAlert"];
+                "multipart/form-data": components["schemas"]["CreateBackInStockAlert"];
+            };
+        };
+        responses: {
+            /** @description Created. New alert in response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BackInStockAlert"];
+                };
+            };
+            /** @description Bad request (something invalid, more info in response body) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized (more info in response body) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Business logic problem (more info in response body) */
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     my_account_backinstockalerts_destroy: {
         parameters: {
             query?: never;
@@ -3692,7 +3822,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CreateWishListItem"];
+                    "application/json": components["schemas"]["WishListItem"];
                 };
             };
             /** @description Bad request (something invalid, more info in response body) */
@@ -5617,7 +5747,7 @@ export interface operations {
             query?: {
                 /** @description A page number within the paginated result set. */
                 page?: number;
-                /** @description Search theme by slug. Only themes matching the whole string will be returned. This detabase only contains themes from sets  that have been previously integrated by a user. */
+                /** @description Search theme by slug. Only themes matching the whole string will be returned. This database only contains themes from sets  that have been previously integrated by a user. */
                 search?: string;
             };
             header?: never;
@@ -5702,7 +5832,7 @@ export interface operations {
                 page?: number;
                 /** @description Number of results to return per page. */
                 page_size?: number;
-                /** @description part of username to look for. At least 3 chars. */
+                /** @description part of username to look for (min. 3 chars). */
                 searched_string: string;
             };
             header?: never;

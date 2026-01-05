@@ -967,7 +967,7 @@ paths:
         '401':
           description: Unauthorized (more info in response body)
         '404':
-          description: Not found
+          description: Not found (does not exist, not yours, or already published
     delete:
       operationId: inventories_mine_destroy
       description: This action allows you to delete one of your pending (not published)
@@ -996,6 +996,39 @@ paths:
           description: Forbidden (you don't have access to this inventory)
         '406':
           description: Business logic problem (more info in response body)
+  /api/inventories/mine/{id}/publish:
+    post:
+      operationId: inventories_mine_publish_create
+      description: This action allows you to publish one of your new per-bags inventory,
+        making it visible byeveryone. You won't be able to edit it after that
+      summary: Publish one of you per-bags set inventory
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Manage your own per-bags set inventories and contribute to our community database
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetInventory'
+          description: Published. Inventory in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '404':
+          description: Not found (id does not exist, inventory is not yours or already
+            published)
+        '406':
+          description: Business logic problem (more info in response body)
   /api/legosets/:
     get:
       operationId: legosets_list
@@ -1014,7 +1047,7 @@ paths:
         schema:
           type: string
         description: Search sets by name, description, headline or LEGO® identifier.
-          Only sets matching the whole string will be returned. This detabase only
+          Only sets matching the whole string will be returned. This database only
           contains sets that have been previously integrated by a user.
       tags:
       - Explore our LEGO® sets database
@@ -1129,6 +1162,41 @@ paths:
           description: Unauthorized (more info in response body)
         '403':
           description: Forbidden (you don't have an account)
+    post:
+      operationId: my_account_backinstockalerts_create
+      description: 'This action allows you to create a new ''back in stock'' alert
+        for a set using it''s LEGO id (for example ''10333-1'' for ''The Lord of the
+        Rings: Barad-dûr'')'
+      summary: Register a new 'back in stock' alert
+      tags:
+      - Manage your favorites
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBackInStockAlert'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateBackInStockAlert'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateBackInStockAlert'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackInStockAlert'
+          description: Created. New alert in response
+        '400':
+          description: Bad request (something invalid, more info in response body)
+        '401':
+          description: Unauthorized (more info in response body)
+        '406':
+          description: Business logic problem (more info in response body)
   /api/my_account/backinstockalerts/{id}/:
     delete:
       operationId: my_account_backinstockalerts_destroy
@@ -1212,7 +1280,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateWishListItem'
+                $ref: '#/components/schemas/WishListItem'
           description: Created. New wish list item in response
         '400':
           description: Bad request (something invalid, more info in response body)
@@ -2592,7 +2660,7 @@ paths:
         schema:
           type: string
         description: Search theme by slug. Only themes matching the whole string will
-          be returned. This detabase only contains themes from sets  that have been
+          be returned. This database only contains themes from sets  that have been
           previously integrated by a user.
       tags:
       - Explore our LEGO® themes database
@@ -2666,7 +2734,7 @@ paths:
         schema:
           type: string
           minLength: 3
-        description: part of username to look for. At least 3 chars.
+        description: part of username to look for (min. 3 chars).
         required: true
       tags:
       - List our user's usernames
@@ -3611,6 +3679,13 @@ components:
         * `YE` - Yemen
         * `ZM` - Zambia
         * `ZW` - Zimbabwe
+    CreateBackInStockAlert:
+      type: object
+      properties:
+        legoset_lego_id:
+          type: string
+          nullable: true
+          maxLength: 20
     CreateBagInventory:
       type: object
       properties:
@@ -4072,6 +4147,10 @@ components:
           type: string
           readOnly: true
           description: URL of inventory page on website
+        published_on:
+          type: string
+          format: date-time
+          nullable: true
         bag_list:
           type: array
           items:
@@ -5395,6 +5474,10 @@ components:
           type: string
           readOnly: true
           description: URL of inventory page on website
+        published_on:
+          type: string
+          format: date-time
+          nullable: true
       required:
       - author
       - author_username
@@ -5429,6 +5512,10 @@ components:
           type: string
           readOnly: true
           description: URL of inventory page on website
+        published_on:
+          type: string
+          format: date-time
+          nullable: true
         bag_list:
           type: array
           items:
